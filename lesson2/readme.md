@@ -7,3 +7,4 @@
 * Старайтесь следовать рекомендациям (Best Practices) из лекции при написании Dockerfile.
 * При запуске контейнера из образа с указанием проксирования порта (флаг -p или -P если указан EXPOSE) при обращении на localhost:port должно быть доступно приложение в контейнере (оно отвечает Hello, World!).
 * Сохраните получившийся Dockerfile в любом публичном Git репозитории, например GitHub, и пришлите ссылку на репозиторий.
+https://github.com/adterskov/geekbrains-conteinerization/tree/master/homework/2.docker
