@@ -101,7 +101,7 @@ ____
    * Фактически реализует Service (ipvs и iptables)
 7. HA кластер
 
-### Урок 7. [Продвинутые абстракции](https://github.com/TolstikovIgor/containerization/tree/main/lesson7)
+### [Урок 7. Продвинутые абстракции](https://github.com/TolstikovIgor/containerization/tree/main/lesson7)
 1. DaemonSet
    * Запускает поды на всех нодах кластера
    * При добавлении ноды – добавляет под
