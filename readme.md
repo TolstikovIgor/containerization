@@ -19,7 +19,7 @@ ____
   * Registry
 * Docker не про контейнеры
 
-### Урок 2. Docker
+### [Урок 2. Docker](https://github.com/TolstikovIgor/containerization/tree/main/lesson2)
 1. Запуск контейнеров
 2. Создание образов
 3. Dockerfile
@@ -29,7 +29,7 @@ ____
 4. Запуск мультисервисных окружений (docker-compose)
 5. Оркестратор контейнеров
 
-### Урок 3. Введение в Kubernetes
+### [Урок 3. Введение в Kubernetes](https://github.com/TolstikovIgor/containerization/tree/main/lesson3)
 * Kubernetes — это оркестратор контейнеров
 * Главные принципы Kubernetes
   * Immutable
@@ -42,7 +42,7 @@ ____
   * ReplicaSet
   * Deployment
 
-### Урок 4. Хранение данных и ресурсы
+### [Урок 4. Хранение данных и ресурсы](https://github.com/TolstikovIgor/containerization/tree/main/lesson4)
 * Ресурсы контейнеров
   * Limits
   * Requests
@@ -54,7 +54,7 @@ ____
   * Persistent Volume Claim
   * PV Provisioners
 
-### Урок 5. Сетевые абстракции Kubernetes
+### [Урок 5. Сетевые абстракции Kubernetes](https://github.com/TolstikovIgor/containerization/tree/main/lesson5)
 1. Service
 2. Проверки доступности
    * Liveness Probe
@@ -101,7 +101,7 @@ ____
    * Фактически реализует Service (ipvs и iptables)
 7. HA кластер
 
-### Урок 7. Продвинутые абстракции
+### Урок 7. [Продвинутые абстракции](https://github.com/TolstikovIgor/containerization/tree/main/lesson7)
 1. DaemonSet
    * Запускает поды на всех нодах кластера
    * При добавлении ноды – добавляет под
@@ -119,7 +119,7 @@ ____
    * Важные параметры
 5. Horizontal Pod Autoscaler
 
-### Урок 8. Деплой тестового приложения в кластер, CI/CD
+### [Урок 8. Деплой тестового приложения в кластер, CI/CD](https://github.com/TolstikovIgor/containerization/tree/main/lesson8)
 1. CI/CD
    * Continuous Integration
    * Continuous Delivery
