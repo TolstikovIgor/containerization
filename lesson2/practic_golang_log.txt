@@ -1,0 +1,303 @@
+igor@igor-MS-7808:~$ ssh igor@192.168.1.70
+igor@192.168.1.70's password: 
+Welcome to Ubuntu 20.04.4 LTS (GNU/Linux 5.4.0-105-generic x86_64)
+
+ * Documentation:  https://help.ubuntu.com
+ * Management:     https://landscape.canonical.com
+ * Support:        https://ubuntu.com/advantage
+
+  System information as of Чт 24 мар 2022 16:50:44 UTC
+
+  System load:                      0.07
+  Usage of /:                       67.6% of 23.99GB
+  Memory usage:                     23%
+  Swap usage:                       0%
+  Processes:                        154
+  Users logged in:                  0
+  IPv4 address for br-11f4f1756b47: 192.168.49.1
+  IPv4 address for docker0:         172.17.0.1
+  IPv4 address for enp0s3:          192.168.1.70
+  IPv6 address for enp0s3:          2a00:1370:81a8:4ef5:6865:8237:f93d:ff73
+  IPv6 address for enp0s3:          2a00:1370:81a8:4ef5:a00:27ff:feed:d11a
+  IPv6 address for enp0s3:          fd81:2f4:e5b0:1:a00:27ff:feed:d11a
+
+ * Super-optimized for small spaces - read how we shrank the memory
+   footprint of MicroK8s to make it the smallest full K8s around.
+
+   https://ubuntu.com/blog/microk8s-memory-optimisation
+
+0 updates can be applied immediately.
+
+
+Last login: Thu Mar 24 14:44:08 2022 from 192.168.1.68
+igor@ubuntu-server:~$ docker version
+Client: Docker Engine - Community
+ Version:           20.10.13
+ API version:       1.41
+ Go version:        go1.16.15
+ Git commit:        a224086
+ Built:             Thu Mar 10 14:07:51 2022
+ OS/Arch:           linux/amd64
+ Context:           default
+ Experimental:      true
+
+Server: Docker Engine - Community
+ Engine:
+  Version:          20.10.13
+  API version:      1.41 (minimum version 1.12)
+  Go version:       go1.16.15
+  Git commit:       906f57f
+  Built:            Thu Mar 10 14:05:44 2022
+  OS/Arch:          linux/amd64
+  Experimental:     false
+ containerd:
+  Version:          1.5.10
+  GitCommit:        2a1d4dbdb2a1030dc5b01e96fb110a9d9f150ecc
+ runc:
+  Version:          1.0.3
+  GitCommit:        v1.0.3-0-gf46b6ba
+ docker-init:
+  Version:          0.19.0
+  GitCommit:        de40ad0
+igor@ubuntu-server:~$ ls
+ app                                                        data                      gitlab-runner.yaml        kubectl.sha256           replicaset_.yaml
+ cicd                                                       deployment-pg.yaml        help_keyword_report.sql   minikube-linux-amd64     serviceaccount.yaml
+'closer.cgi?path=%2Fkafka%2F3.0.0%2Fkafka_2.12-3.0.0.tgz'   deployment-redmine.yaml   id_rsa_gitlab             mysql.sql                service-pg.yaml
+'closer.cgi?path=%2Fkafka%2F3.0.0%2Fkafka-3.0.0-src.tgz'    deployment_.yaml          id_rsa_gitlab.pub         pod_pv_deployment.yaml   service-redmine.yaml
+ clusterrolebinding.yaml                                    Dockerfile                ingress.yaml              pod_.yaml                service.yaml
+ clusterrole.yaml                                           example.sql               kafka                     pv2.yaml                 shop7.sql
+ configmap.yaml                                             fulldb_before.sql         kafka_2.12-3.0.0          pvc.yaml                 statefulset.yaml
+ daemonset.yaml                                             geekbrains                kafka-3.0.0-src           pv.yaml
+igor@ubuntu-server:~$ cd geekbrains
+igor@ubuntu-server:~/geekbrains$ ls
+'Docker Cheat Sheet.pdf'   homework  'Kubectl Cheat Sheet.pdf'   practice   README.md   test.txt
+igor@ubuntu-server:~/geekbrains$ cd practice
+igor@ubuntu-server:~/geekbrains/practice$ ls
+2.docker  3.kubernetes-intro  4.resources-and-persistence  5.kubernetes-network  7.advanced-abstractions  8.ci-cd
+igor@ubuntu-server:~/geekbrains/practice$ cd 2.docker
+igor@ubuntu-server:~/geekbrains/practice/2.docker$ ls
+docker-compose  golang  python-django
+igor@ubuntu-server:~/geekbrains/practice/2.docker$ cd golang
+igor@ubuntu-server:~/geekbrains/practice/2.docker/golang$ ls
+Dockerfile  go.mod  go.sum  main.go
+igor@ubuntu-server:~/geekbrains/practice/2.docker/golang$ vi Dockerfile
+igor@ubuntu-server:~/geekbrains/practice/2.docker/golang$ docker build -t my-too-image .
+Sending build context to Docker daemon   5.12kB
+Step 1/9 : FROM golang as builder
+latest: Pulling from library/golang
+5492f66d2700: Already exists 
+540ff8c0841d: Already exists 
+a0bf850a0df0: Already exists 
+d751dc38ae51: Already exists 
+26ee1eb1b3b3: Pull complete 
+efc242f34a7e: Pull complete 
+e795b75807e4: Pull complete 
+Digest: sha256:fb5993c8c22ae9fec57f91a3e59825f9368d01b1d15a984d83080cac575f79b8
+Status: Downloaded newer image for golang:latest
+ ---> 3abbb425095a
+Step 2/9 : RUN mkdir /app
+ ---> Running in 8607f1a8fb09
+Removing intermediate container 8607f1a8fb09
+ ---> 0a73837b808a
+Step 3/9 : COPY . /app
+ ---> 2a3fbb0ccbf6
+Step 4/9 : WORKDIR /app
+ ---> Running in 087b44c3c3a3
+Removing intermediate container 087b44c3c3a3
+ ---> 325f447b3c45
+Step 5/9 : RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o server .
+ ---> Running in 6f4756c82441
+go: downloading github.com/gorilla/mux v1.7.4
+Removing intermediate container 6f4756c82441
+ ---> c5ac6348e011
+Step 6/9 : FROM scratch
+ ---> 
+Step 7/9 : COPY --from=builder /app/server /
+ ---> 8833d5c131b7
+Step 8/9 : EXPOSE 8080
+ ---> Running in 51b42e7d3838
+Removing intermediate container 51b42e7d3838
+ ---> 83b8335435e8
+Step 9/9 : CMD ["/server"]
+ ---> Running in fcb0b07130a4
+Removing intermediate container fcb0b07130a4
+ ---> fce27c0fb25c
+Successfully built fce27c0fb25c
+Successfully tagged my-too-image:latest
+igor@ubuntu-server:~/geekbrains/practice/2.docker/golang$ docker image ls
+REPOSITORY                    TAG       IMAGE ID       CREATED          SIZE
+my-too-image                  latest    fce27c0fb25c   3 minutes ago    6.53MB
+<none>                        <none>    c5ac6348e011   3 minutes ago    987MB
+my-first-image                latest    26e85e62462f   59 minutes ago   974MB
+my-first-image                v1        7195fe0eefe0   2 hours ago      956MB
+golang                        latest    3abbb425095a   5 days ago       964MB
+python                        3.9       47abcf270bef   6 days ago       914MB
+redhat/ubi8-minimal           latest    281e62f51d47   2 weeks ago      103MB
+hello-world                   latest    feb5d9fea6a5   6 months ago     13.3kB
+gcr.io/k8s-minikube/kicbase   v0.0.27   9fa1cc16ad6d   6 months ago     1.08GB
+igor@ubuntu-server:~/geekbrains/practice/2.docker/golang$ docker run -d -p 80:8000 my-too-image
+67afcbc95043e4da69a59a7fd7bbf6750aa63762ff4f16f8f13c55d0e05df2ba
+docker: Error response from daemon: driver failed programming external connectivity on endpoint heuristic_tesla (c623d468869d5f4aa7525b3d6abd9528102860966708c5b1163ffe3ef5f79b9e): Bind for 0.0.0.0:80 failed: port is already allocated.
+igor@ubuntu-server:~/geekbrains/practice/2.docker/golang$ docker ps
+CONTAINER ID   IMAGE          COMMAND                  CREATED          STATUS          PORTS                                   NAMES
+8ee1bb383977   7195fe0eefe0   "/bin/sh -c 'python …"   59 minutes ago   Up 59 minutes   0.0.0.0:80->8000/tcp, :::80->8000/tcp   wonderful_chatelet
+igor@ubuntu-server:~/geekbrains/practice/2.docker/golang$ docker container stop 8ee1bb383977
+8ee1bb383977
+igor@ubuntu-server:~/geekbrains/practice/2.docker/golang$ docker run -d -p 80:8000 my-too-image
+81557d8c3fc36ad745c87d6a0bf795dd3fbc2472dd00c167cc8dd69c96eedf52
+igor@ubuntu-server:~/geekbrains/practice/2.docker/golang$ docker logs
+"docker logs" requires exactly 1 argument.
+See 'docker logs --help'.
+
+Usage:  docker logs [OPTIONS] CONTAINER
+
+Fetch the logs of a container
+igor@ubuntu-server:~/geekbrains/practice/2.docker/golang$ docker ps
+CONTAINER ID   IMAGE          COMMAND     CREATED              STATUS              PORTS                                             NAMES
+81557d8c3fc3   my-too-image   "/server"   About a minute ago   Up About a minute   8080/tcp, 0.0.0.0:80->8000/tcp, :::80->8000/tcp   eager_bell
+igor@ubuntu-server:~/geekbrains/practice/2.docker/golang$ docker logs 81557d8c3fc3
+igor@ubuntu-server:~/geekbrains/practice/2.docker/golang$ curl 0.0.0.0:80
+curl: (56) Recv failure: Connection reset by peer
+igor@ubuntu-server:~/geekbrains/practice/2.docker/golang$ docker logs 81557d8c3fc3
+igor@ubuntu-server:~/geekbrains/practice/2.docker/golang$ docker exec -t -i 81557d8c3fc3 bash
+OCI runtime exec failed: exec failed: container_linux.go:380: starting container process caused: exec: "bash": executable file not found in $PATH: unknown
+igor@ubuntu-server:~/geekbrains/practice/2.docker/golang$ ls
+Dockerfile  go.mod  go.sum  main.go
+igor@ubuntu-server:~/geekbrains/practice/2.docker/golang$ vi Dockerfile
+igor@ubuntu-server:~/geekbrains/practice/2.docker/golang$ docker container stop 81557d8c3fc3
+81557d8c3fc3
+igor@ubuntu-server:~/geekbrains/practice/2.docker/golang$ docker container rm 81557d8c3fc3
+81557d8c3fc3
+igor@ubuntu-server:~/geekbrains/practice/2.docker/golang$ docker ps -a
+CONTAINER ID   IMAGE                                 COMMAND                  CREATED             STATUS                         PORTS     NAMES
+67afcbc95043   my-too-image                          "/server"                33 minutes ago      Created                                  heuristic_tesla
+8ee1bb383977   7195fe0eefe0                          "/bin/sh -c 'python …"   About an hour ago   Exited (137) 19 minutes ago              wonderful_chatelet
+e273cc18a91a   26e85e62462f                          "/bin/sh -c 'python …"   About an hour ago   Exited (1) About an hour ago             gifted_gould
+56a6cf0b90ec   my-first-image                        "/bin/sh -c 'python …"   About an hour ago   Exited (1) About an hour ago             priceless_kowalevski
+3041bc99fb37   gcr.io/k8s-minikube/kicbase:v0.0.27   "/usr/local/bin/entr…"   4 months ago        Exited (130) 4 months ago                minikube
+0a4bdf412265   hello-world                           "/hello"                 4 months ago        Exited (0) 4 months ago                  happy_brahmagupta
+igor@ubuntu-server:~/geekbrains/practice/2.docker/golang$ docker build -t my-too-image:v1 .
+Sending build context to Docker daemon   5.12kB
+Step 1/10 : FROM golang as builder
+ ---> 3abbb425095a
+Step 2/10 : RUN mkdir /app
+ ---> Using cache
+ ---> 0a73837b808a
+Step 3/10 : COPY . /app
+ ---> 80ad9b5e7421
+Step 4/10 : WORKDIR /app
+ ---> Running in 70d3bcd50792
+Removing intermediate container 70d3bcd50792
+ ---> 707abf89af56
+Step 5/10 : RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o server .
+ ---> Running in 662fdfa5759a
+go: downloading github.com/gorilla/mux v1.7.4
+Removing intermediate container 662fdfa5759a
+ ---> 5758bd961866
+Step 6/10 : RUN apt update
+ ---> Running in 8fb40e35673c
+
+WARNING: apt does not have a stable CLI interface. Use with caution in scripts.
+
+Get:1 http://security.debian.org/debian-security bullseye-security InRelease [44.1 kB]
+Get:2 http://deb.debian.org/debian bullseye InRelease [116 kB]
+Get:3 http://deb.debian.org/debian bullseye-updates InRelease [39.4 kB]
+Get:4 http://security.debian.org/debian-security bullseye-security/main amd64 Packages [122 kB]
+Get:5 http://deb.debian.org/debian bullseye/main amd64 Packages [8183 kB]
+Get:6 http://deb.debian.org/debian bullseye-updates/main amd64 Packages [2596 B]
+Fetched 8507 kB in 2s (5221 kB/s)
+Reading package lists...
+Building dependency tree...
+Reading state information...
+All packages are up to date.
+Removing intermediate container 8fb40e35673c
+ ---> f85c604d6496
+Step 7/10 : FROM scratch
+ ---> 
+Step 8/10 : COPY --from=builder /app/server /
+ ---> Using cache
+ ---> 8833d5c131b7
+Step 9/10 : EXPOSE 8080
+ ---> Using cache
+ ---> 83b8335435e8
+Step 10/10 : CMD ["/server"]
+ ---> Using cache
+ ---> fce27c0fb25c
+Successfully built fce27c0fb25c
+Successfully tagged my-too-image:v1
+igor@ubuntu-server:~/geekbrains/practice/2.docker/golang$ docker image ls
+REPOSITORY                    TAG       IMAGE ID       CREATED          SIZE
+<none>                        <none>    f85c604d6496   2 minutes ago    1GB
+my-too-image                  latest    fce27c0fb25c   42 minutes ago   6.53MB
+my-too-image                  v1        fce27c0fb25c   42 minutes ago   6.53MB
+<none>                        <none>    c5ac6348e011   42 minutes ago   987MB
+my-first-image                latest    26e85e62462f   2 hours ago      974MB
+my-first-image                v1        7195fe0eefe0   3 hours ago      956MB
+golang                        latest    3abbb425095a   5 days ago       964MB
+python                        3.9       47abcf270bef   6 days ago       914MB
+redhat/ubi8-minimal           latest    281e62f51d47   2 weeks ago      103MB
+hello-world                   latest    feb5d9fea6a5   6 months ago     13.3kB
+gcr.io/k8s-minikube/kicbase   v0.0.27   9fa1cc16ad6d   6 months ago     1.08GB
+igor@ubuntu-server:~/geekbrains/practice/2.docker/golang$ docker run -d -p 80:8000 my-too-image
+0a632b875ae6437e7781d80779b82add3b110b3d034b4bdb28854efa44465d60
+igor@ubuntu-server:~/geekbrains/practice/2.docker/golang$ docker ps
+CONTAINER ID   IMAGE          COMMAND     CREATED          STATUS          PORTS                                             NAMES
+0a632b875ae6   my-too-image   "/server"   21 seconds ago   Up 20 seconds   8080/tcp, 0.0.0.0:80->8000/tcp, :::80->8000/tcp   keen_kalam
+igor@ubuntu-server:~/geekbrains/practice/2.docker/golang$ curl 0.0.0.0:80
+curl: (56) Recv failure: Connection reset by peer
+igor@ubuntu-server:~/geekbrains/practice/2.docker/golang$ docker logs 0a632b875ae6
+igor@ubuntu-server:~/geekbrains/practice/2.docker/golang$ docker logs my-too-image
+Error: No such container: my-too-image
+igor@ubuntu-server:~/geekbrains/practice/2.docker/golang$ docker image ls
+REPOSITORY                    TAG       IMAGE ID       CREATED          SIZE
+<none>                        <none>    f85c604d6496   7 minutes ago    1GB
+my-too-image                  latest    fce27c0fb25c   48 minutes ago   6.53MB
+my-too-image                  v1        fce27c0fb25c   48 minutes ago   6.53MB
+<none>                        <none>    c5ac6348e011   48 minutes ago   987MB
+my-first-image                latest    26e85e62462f   2 hours ago      974MB
+my-first-image                v1        7195fe0eefe0   3 hours ago      956MB
+golang                        latest    3abbb425095a   5 days ago       964MB
+python                        3.9       47abcf270bef   6 days ago       914MB
+redhat/ubi8-minimal           latest    281e62f51d47   2 weeks ago      103MB
+hello-world                   latest    feb5d9fea6a5   6 months ago     13.3kB
+gcr.io/k8s-minikube/kicbase   v0.0.27   9fa1cc16ad6d   6 months ago     1.08GB
+igor@ubuntu-server:~/geekbrains/practice/2.docker/golang$ docker ps -a
+CONTAINER ID   IMAGE                                 COMMAND                  CREATED          STATUS                        PORTS                                             NAMES
+0a632b875ae6   my-too-image                          "/server"                6 minutes ago    Up 6 minutes                  8080/tcp, 0.0.0.0:80->8000/tcp, :::80->8000/tcp   keen_kalam
+67afcbc95043   my-too-image                          "/server"                46 minutes ago   Created                                                                         heuristic_tesla
+8ee1bb383977   7195fe0eefe0                          "/bin/sh -c 'python …"   2 hours ago      Exited (137) 32 minutes ago                                                     wonderful_chatelet
+e273cc18a91a   26e85e62462f                          "/bin/sh -c 'python …"   2 hours ago      Exited (1) 2 hours ago                                                          gifted_gould
+56a6cf0b90ec   my-first-image                        "/bin/sh -c 'python …"   2 hours ago      Exited (1) 2 hours ago                                                          priceless_kowalevski
+3041bc99fb37   gcr.io/k8s-minikube/kicbase:v0.0.27   "/usr/local/bin/entr…"   4 months ago     Exited (130) 4 months ago                                                       minikube
+0a4bdf412265   hello-world                           "/hello"                 4 months ago     Exited (0) 4 months ago                                                         happy_brahmagupta
+igor@ubuntu-server:~/geekbrains/practice/2.docker/golang$ docker ps
+CONTAINER ID   IMAGE          COMMAND     CREATED         STATUS         PORTS                                             NAMES
+0a632b875ae6   my-too-image   "/server"   7 minutes ago   Up 7 minutes   8080/tcp, 0.0.0.0:80->8000/tcp, :::80->8000/tcp   keen_kalam
+igor@ubuntu-server:~/geekbrains/practice/2.docker/golang$ docker container stop 0a632b875ae6
+0a632b875ae6
+igor@ubuntu-server:~/geekbrains/practice/2.docker/golang$ docker ps
+CONTAINER ID   IMAGE     COMMAND   CREATED   STATUS    PORTS     NAMES
+igor@ubuntu-server:~/geekbrains/practice/2.docker/golang$ docker ps -a
+CONTAINER ID   IMAGE                                 COMMAND                  CREATED          STATUS                        PORTS     NAMES
+0a632b875ae6   my-too-image                          "/server"                8 minutes ago    Exited (2) 10 seconds ago               keen_kalam
+67afcbc95043   my-too-image                          "/server"                48 minutes ago   Created                                 heuristic_tesla
+8ee1bb383977   7195fe0eefe0                          "/bin/sh -c 'python …"   2 hours ago      Exited (137) 33 minutes ago             wonderful_chatelet
+e273cc18a91a   26e85e62462f                          "/bin/sh -c 'python …"   2 hours ago      Exited (1) 2 hours ago                  gifted_gould
+56a6cf0b90ec   my-first-image                        "/bin/sh -c 'python …"   2 hours ago      Exited (1) 2 hours ago                  priceless_kowalevski
+3041bc99fb37   gcr.io/k8s-minikube/kicbase:v0.0.27   "/usr/local/bin/entr…"   4 months ago     Exited (130) 4 months ago               minikube
+0a4bdf412265   hello-world                           "/hello"                 4 months ago     Exited (0) 4 months ago                 happy_brahmagupta
+igor@ubuntu-server:~/geekbrains/practice/2.docker/golang$ docker image ls
+REPOSITORY                    TAG       IMAGE ID       CREATED          SIZE
+<none>                        <none>    f85c604d6496   14 minutes ago   1GB
+my-too-image                  latest    fce27c0fb25c   55 minutes ago   6.53MB
+my-too-image                  v1        fce27c0fb25c   55 minutes ago   6.53MB
+<none>                        <none>    c5ac6348e011   55 minutes ago   987MB
+my-first-image                latest    26e85e62462f   2 hours ago      974MB
+my-first-image                v1        7195fe0eefe0   3 hours ago      956MB
+golang                        latest    3abbb425095a   5 days ago       964MB
+python                        3.9       47abcf270bef   6 days ago       914MB
+redhat/ubi8-minimal           latest    281e62f51d47   2 weeks ago      103MB
+hello-world                   latest    feb5d9fea6a5   6 months ago     13.3kB
+gcr.io/k8s-minikube/kicbase   v0.0.27   9fa1cc16ad6d   6 months ago     1.08GB
+igor@ubuntu-server:~/geekbrains/practice/2.docker/golang$ 
+
