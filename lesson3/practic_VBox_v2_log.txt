@@ -1,0 +1,355 @@
+igor@igor-MS-7808:~$ ssh igor@192.168.1.70
+igor@192.168.1.70's password: 
+Welcome to Ubuntu 20.04.4 LTS (GNU/Linux 5.4.0-105-generic x86_64)
+
+ * Documentation:  https://help.ubuntu.com
+ * Management:     https://landscape.canonical.com
+ * Support:        https://ubuntu.com/advantage
+
+  System information as of Пт 25 мар 2022 18:36:06 UTC
+
+  System load:                      0.02
+  Usage of /:                       71.1% of 23.99GB
+  Memory usage:                     19%
+  Swap usage:                       0%
+  Processes:                        138
+  Users logged in:                  1
+  IPv4 address for br-11f4f1756b47: 192.168.49.1
+  IPv4 address for docker0:         172.17.0.1
+  IPv4 address for enp0s3:          192.168.1.70
+  IPv6 address for enp0s3:          2a00:1370:81a8:4ef5:7102:2ec:7546:cb5c
+  IPv6 address for enp0s3:          2a00:1370:81a8:4ef5:a00:27ff:feed:d11a
+  IPv6 address for enp0s3:          fd81:2f4:e5b0:1:a00:27ff:feed:d11a
+
+ * Super-optimized for small spaces - read how we shrank the memory
+   footprint of MicroK8s to make it the smallest full K8s around.
+
+   https://ubuntu.com/blog/microk8s-memory-optimisation
+
+5 updates can be applied immediately.
+To see these additional updates run: apt list --upgradable
+
+
+Last login: Fri Mar 25 17:58:22 2022 from 192.168.1.68
+igor@ubuntu-server:~$ minikube start
+😄  minikube v1.23.2 on Ubuntu 20.04 (vbox/amd64)
+✨  Using the docker driver based on existing profile
+👍  Starting control plane node minikube in cluster minikube
+🚜  Pulling base image ...
+🔄  Restarting existing docker container for "minikube" ...
+🐳  Preparing Kubernetes v1.22.2 on Docker 20.10.8 ...
+🔎  Verifying Kubernetes components...
+    ▪ Using image k8s.gcr.io/ingress-nginx/kube-webhook-certgen:v1.0
+    ▪ Using image k8s.gcr.io/ingress-nginx/kube-webhook-certgen:v1.0
+    ▪ Using image k8s.gcr.io/ingress-nginx/controller:v1.0.0-beta.3
+    ▪ Using image gcr.io/k8s-minikube/storage-provisioner:v5
+🔎  Verifying ingress addon...
+🌟  Enabled addons: storage-provisioner, ingress, default-storageclass
+🏄  Done! kubectl is now configured to use "minikube" cluster and "default" namespace by default
+igor@ubuntu-server:~$ vi pod_.yaml
+igor@ubuntu-server:~$ vi pod_.yaml
+igor@ubuntu-server:~$ kubectl apply -f pod_.yaml
+pod/my-pod created
+igor@ubuntu-server:~$ kubectl get pod
+NAME                             READY   STATUS    RESTARTS          AGE
+database-0                       0/1     Pending   0                 128d
+geekbrains-55df48c88d-klqx7      1/1     Running   8 (44m ago)       128d
+geekbrains-55df48c88d-rz2qz      1/1     Running   8 (44m ago)       128d
+gitlab-runner-7467648488-jmlsl   1/1     Running   101 (2m36s ago)   129d
+my-pod                           1/1     Running   0                 16s
+node-exporter-n5xqk              1/1     Running   11 (44m ago)      132d
+prometheus-0                     0/1     Pending   0                 133d
+igor@ubuntu-server:~$ kubectl get pod my-pod
+NAME     READY   STATUS    RESTARTS   AGE
+my-pod   1/1     Running   0          11m
+igor@ubuntu-server:~$ kubectl describe pod my-pod
+Name:         my-pod
+Namespace:    default
+Priority:     0
+Node:         minikube/192.168.49.2
+Start Time:   Fri, 25 Mar 2022 18:45:18 +0000
+Labels:       <none>
+Annotations:  <none>
+Status:       Running
+IP:           172.17.0.13
+IPs:
+  IP:  172.17.0.13
+Containers:
+  nginx:
+    Container ID:   docker://9b401b3cc5868d3c04d5ad73fe9ef85516eb264dc2ffa6db90b6a6e8dd6a6b5d
+    Image:          nginx:1.12
+    Image ID:       docker-pullable://nginx@sha256:72daaf46f11cc753c4eab981cbf869919bd1fee3d2170a2adeac12400f494728
+    Port:           80/TCP
+    Host Port:      0/TCP
+    State:          Running
+      Started:      Fri, 25 Mar 2022 18:45:19 +0000
+    Ready:          True
+    Restart Count:  0
+    Environment:    <none>
+    Mounts:
+      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-b8dpj (ro)
+Conditions:
+  Type              Status
+  Initialized       True 
+  Ready             True 
+  ContainersReady   True 
+  PodScheduled      True 
+Volumes:
+  kube-api-access-b8dpj:
+    Type:                    Projected (a volume that contains injected data from multiple sources)
+    TokenExpirationSeconds:  3607
+    ConfigMapName:           kube-root-ca.crt
+    ConfigMapOptional:       <nil>
+    DownwardAPI:             true
+QoS Class:                   BestEffort
+Node-Selectors:              <none>
+Tolerations:                 node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
+                             node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
+Events:
+  Type    Reason     Age   From               Message
+  ----    ------     ----  ----               -------
+  Normal  Scheduled  13m   default-scheduler  Successfully assigned default/my-pod to minikube
+  Normal  Pulled     13m   kubelet            Container image "nginx:1.12" already present on machine
+  Normal  Created    13m   kubelet            Created container nginx
+  Normal  Started    13m   kubelet            Started container nginx
+igor@ubuntu-server:~$ kubectl delete pod my-pod
+pod "my-pod" deleted
+igor@ubuntu-server:~$ kubectl describe pod my-pod
+Error from server (NotFound): pods "my-pod" not found
+igor@ubuntu-server:~$ vi replicaset_.yaml
+igor@ubuntu-server:~$ kubectl apply -f replicaset_.yaml
+error: error validating "replicaset_.yaml": error validating data: ValidationError(ReplicaSet.spec.template): unknown field "metadate" in io.k8s.api.core.v1.PodTemplateSpec; if you choose to ignore these errors, turn validation off with --validate=false
+igor@ubuntu-server:~$ vi replicaset_.yaml
+igor@ubuntu-server:~$ kubectl apply -f replicaset_.yaml
+error: error validating "replicaset_.yaml": error validating data: ValidationError(ReplicaSet.spec.template): unknown field "metadate" in io.k8s.api.core.v1.PodTemplateSpec; if you choose to ignore these errors, turn validation off with --validate=false
+igor@ubuntu-server:~$ vi replicaset_.yaml
+igor@ubuntu-server:~$ kubectl apply -f replicaset_.yaml
+replicaset.apps/my-replicaset created
+igor@ubuntu-server:~$ kubectl get pods
+NAME                             READY   STATUS    RESTARTS          AGE
+database-0                       0/1     Pending   0                 128d
+geekbrains-55df48c88d-klqx7      1/1     Running   8 (75m ago)       128d
+geekbrains-55df48c88d-rz2qz      1/1     Running   8 (75m ago)       128d
+gitlab-runner-7467648488-jmlsl   0/1     Running   106 (7m59s ago)   129d
+my-replicaset-47chw              1/1     Running   0                 2m10s
+my-replicaset-xqjt7              1/1     Running   0                 2m10s
+node-exporter-n5xqk              1/1     Running   11 (75m ago)      133d
+prometheus-0                     0/1     Pending   0                 133d
+igor@ubuntu-server:~$ vi replicaset_.yaml
+igor@ubuntu-server:~$ kubectl apply -f replicaset_.yaml
+replicaset.apps/my-replicaset configured
+igor@ubuntu-server:~$ kubectl get pods
+NAME                             READY   STATUS    RESTARTS         AGE
+database-0                       0/1     Pending   0                128d
+geekbrains-55df48c88d-klqx7      1/1     Running   8 (80m ago)      128d
+geekbrains-55df48c88d-rz2qz      1/1     Running   8 (80m ago)      128d
+gitlab-runner-7467648488-jmlsl   0/1     Running   107 (5m8s ago)   129d
+my-replicaset-47chw              1/1     Running   0                7m22s
+my-replicaset-rcb4c              1/1     Running   0                20s
+my-replicaset-xqjt7              1/1     Running   0                7m22s
+node-exporter-n5xqk              1/1     Running   11 (80m ago)     133d
+prometheus-0                     0/1     Pending   0                133d
+igor@ubuntu-server:~$ kubectl describe pod replicaset_.yaml
+Error from server (NotFound): pods "replicaset_.yaml" not found
+igor@ubuntu-server:~$ kubectl describe pod my-replicaset-rcb4c
+Name:         my-replicaset-rcb4c
+Namespace:    default
+Priority:     0
+Node:         minikube/192.168.49.2
+Start Time:   Fri, 25 Mar 2022 19:20:41 +0000
+Labels:       app=my-app
+Annotations:  <none>
+Status:       Running
+IP:           172.17.0.15
+IPs:
+  IP:           172.17.0.15
+Controlled By:  ReplicaSet/my-replicaset
+Containers:
+  nginx:
+    Container ID:   docker://587bf111ae3326d57514d30f1bd486f4bc8e33254c6dc74c4450cda39d994b2e
+    Image:          nginx:1.12
+    Image ID:       docker-pullable://nginx@sha256:72daaf46f11cc753c4eab981cbf869919bd1fee3d2170a2adeac12400f494728
+    Port:           80/TCP
+    Host Port:      0/TCP
+    State:          Running
+      Started:      Fri, 25 Mar 2022 19:20:42 +0000
+    Ready:          True
+    Restart Count:  0
+    Environment:    <none>
+    Mounts:
+      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-hqm6d (ro)
+Conditions:
+  Type              Status
+  Initialized       True 
+  Ready             True 
+  ContainersReady   True 
+  PodScheduled      True 
+Volumes:
+  kube-api-access-hqm6d:
+    Type:                    Projected (a volume that contains injected data from multiple sources)
+    TokenExpirationSeconds:  3607
+    ConfigMapName:           kube-root-ca.crt
+    ConfigMapOptional:       <nil>
+    DownwardAPI:             true
+QoS Class:                   BestEffort
+Node-Selectors:              <none>
+Tolerations:                 node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
+                             node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
+Events:
+  Type    Reason     Age    From               Message
+  ----    ------     ----   ----               -------
+  Normal  Scheduled  4m21s  default-scheduler  Successfully assigned default/my-replicaset-rcb4c to minikube
+  Normal  Pulled     4m20s  kubelet            Container image "nginx:1.12" already present on machine
+  Normal  Created    4m20s  kubelet            Created container nginx
+  Normal  Started    4m20s  kubelet            Started container nginx
+igor@ubuntu-server:~$ vi deployment_.yaml
+igor@ubuntu-server:~$ kubectl apply -f deployment_.yaml
+error: error validating "deployment_.yaml": error validating data: ValidationError(Deployment.spec.template): unknown field "metadate" in io.k8s.api.core.v1.PodTemplateSpec; if you choose to ignore these errors, turn validation off with --validate=false
+igor@ubuntu-server:~$ vi deployment_.yaml
+igor@ubuntu-server:~$ kubectl apply -f deployment_.yaml
+deployment.apps/my-deployment created
+igor@ubuntu-server:~$ kubectl get pods
+NAME                             READY   STATUS             RESTARTS        AGE
+database-0                       0/1     Pending            0               128d
+geekbrains-55df48c88d-klqx7      1/1     Running            8 (91m ago)     128d
+geekbrains-55df48c88d-rz2qz      1/1     Running            8 (91m ago)     128d
+gitlab-runner-7467648488-jmlsl   0/1     CrashLoopBackOff   108 (46s ago)   129d
+my-deployment-76499ffb7-5cj6v    1/1     Running            0               18s
+my-deployment-76499ffb7-5jcmc    1/1     Running            0               18s
+my-replicaset-47chw              1/1     Running            0               18m
+my-replicaset-rcb4c              1/1     Running            0               11m
+my-replicaset-xqjt7              1/1     Running            0               18m
+node-exporter-n5xqk              1/1     Running            11 (91m ago)    133d
+prometheus-0                     0/1     Pending            0               133d
+igor@ubuntu-server:~$ kubectl describ pod my-deployment-76499ffb7-5jcmc
+error: unknown command "describ" for "kubectl"
+
+Did you mean this?
+	describe
+igor@ubuntu-server:~$ kubectl describ pod my-deployment-76499ffb7-5cj6v
+error: unknown command "describ" for "kubectl"
+
+Did you mean this?
+	describe
+igor@ubuntu-server:~$ kubectl describe pod ^C
+igor@ubuntu-server:~$ kubectl describe pod my-deployment-76499ffb7-5cj6v
+Name:         my-deployment-76499ffb7-5cj6v
+Namespace:    default
+Priority:     0
+Node:         minikube/192.168.49.2
+Start Time:   Fri, 25 Mar 2022 19:32:18 +0000
+Labels:       app=my-app
+              pod-template-hash=76499ffb7
+Annotations:  <none>
+Status:       Running
+IP:           172.17.0.17
+IPs:
+  IP:           172.17.0.17
+Controlled By:  ReplicaSet/my-deployment-76499ffb7
+Containers:
+  nginx:
+    Container ID:   docker://6d68d1ed55ac8efa5a1e7c1cc367f0622a3d8feba1ad2cd8ccd62beed65d6666
+    Image:          nginx:1.12
+    Image ID:       docker-pullable://nginx@sha256:72daaf46f11cc753c4eab981cbf869919bd1fee3d2170a2adeac12400f494728
+    Port:           80/TCP
+    Host Port:      0/TCP
+    State:          Running
+      Started:      Fri, 25 Mar 2022 19:32:19 +0000
+    Ready:          True
+    Restart Count:  0
+    Environment:    <none>
+    Mounts:
+      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-7cwxn (ro)
+Conditions:
+  Type              Status
+  Initialized       True 
+  Ready             True 
+  ContainersReady   True 
+  PodScheduled      True 
+Volumes:
+  kube-api-access-7cwxn:
+    Type:                    Projected (a volume that contains injected data from multiple sources)
+    TokenExpirationSeconds:  3607
+    ConfigMapName:           kube-root-ca.crt
+    ConfigMapOptional:       <nil>
+    DownwardAPI:             true
+QoS Class:                   BestEffort
+Node-Selectors:              <none>
+Tolerations:                 node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
+                             node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
+Events:
+  Type    Reason     Age   From               Message
+  ----    ------     ----  ----               -------
+  Normal  Scheduled  16m   default-scheduler  Successfully assigned default/my-deployment-76499ffb7-5cj6v to minikube
+  Normal  Pulled     16m   kubelet            Container image "nginx:1.12" already present on machine
+  Normal  Created    16m   kubelet            Created container nginx
+  Normal  Started    16m   kubelet            Started container nginx
+igor@ubuntu-server:~$ kubectl get deployments
+NAME            READY   UP-TO-DATE   AVAILABLE   AGE
+geekbrains      2/2     2            2           128d
+gitlab-runner   0/1     1            0           129d
+my-deployment   2/2     2            2           18m
+igor@ubuntu-server:~$ kubectl describ deployments my-deployment
+error: unknown command "describ" for "kubectl"
+
+Did you mean this?
+	describe
+igor@ubuntu-server:~$ kubectl describe deployments my-deployment
+Name:                   my-deployment
+Namespace:              default
+CreationTimestamp:      Fri, 25 Mar 2022 19:32:18 +0000
+Labels:                 <none>
+Annotations:            deployment.kubernetes.io/revision: 1
+Selector:               app=my-app
+Replicas:               2 desired | 2 updated | 2 total | 2 available | 0 unavailable
+StrategyType:           RollingUpdate
+MinReadySeconds:        0
+RollingUpdateStrategy:  25% max unavailable, 25% max surge
+Pod Template:
+  Labels:  app=my-app
+  Containers:
+   nginx:
+    Image:        nginx:1.12
+    Port:         80/TCP
+    Host Port:    0/TCP
+    Environment:  <none>
+    Mounts:       <none>
+  Volumes:        <none>
+Conditions:
+  Type           Status  Reason
+  ----           ------  ------
+  Available      True    MinimumReplicasAvailable
+  Progressing    True    NewReplicaSetAvailable
+OldReplicaSets:  <none>
+NewReplicaSet:   my-deployment-76499ffb7 (2/2 replicas created)
+Events:
+  Type    Reason             Age   From                   Message
+  ----    ------             ----  ----                   -------
+  Normal  ScalingReplicaSet  20m   deployment-controller  Scaled up replica set my-deployment-76499ffb7 to 2
+igor@ubuntu-server:~$ kubectl get pods
+NAME                             READY   STATUS    RESTARTS          AGE
+database-0                       0/1     Pending   0                 128d
+geekbrains-55df48c88d-klqx7      1/1     Running   8 (113m ago)      128d
+geekbrains-55df48c88d-rz2qz      1/1     Running   8 (113m ago)      128d
+gitlab-runner-7467648488-jmlsl   0/1     Running   111 (6m56s ago)   129d
+my-deployment-76499ffb7-5cj6v    1/1     Running   0                 22m
+my-deployment-76499ffb7-5jcmc    1/1     Running   0                 22m
+my-replicaset-47chw              1/1     Running   0                 40m
+my-replicaset-rcb4c              1/1     Running   0                 33m
+my-replicaset-xqjt7              1/1     Running   0                 40m
+node-exporter-n5xqk              1/1     Running   11 (113m ago)     133d
+prometheus-0                     0/1     Pending   0                 133d
+igor@ubuntu-server:~$ minicube stop
+
+Command 'minicube' not found, did you mean:
+
+  command 'minitube' from deb minitube (3.1-1build1)
+
+Try: sudo apt install <deb name>
+
+igor@ubuntu-server:~$ minikube stop
+✋  Stopping node "minikube"  ...
+🛑  Powering off "minikube" via SSH ...
+🛑  1 nodes stopped.
+igor@ubuntu-server:~$ 
+
