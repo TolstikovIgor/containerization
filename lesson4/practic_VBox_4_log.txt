@@ -1,0 +1,1567 @@
+igor@igor-MS-7808:~$ ssh igor@192.168.1.70
+igor@192.168.1.70's password: 
+Welcome to Ubuntu 20.04.4 LTS (GNU/Linux 5.4.0-105-generic x86_64)
+
+ * Documentation:  https://help.ubuntu.com
+ * Management:     https://landscape.canonical.com
+ * Support:        https://ubuntu.com/advantage
+
+  System information as of Сб 26 мар 2022 17:42:41 UTC
+
+  System load:                      0.18
+  Usage of /:                       71.2% of 23.99GB
+  Memory usage:                     18%
+  Swap usage:                       0%
+  Processes:                        151
+  Users logged in:                  0
+  IPv4 address for br-11f4f1756b47: 192.168.49.1
+  IPv4 address for docker0:         172.17.0.1
+  IPv4 address for enp0s3:          192.168.1.70
+  IPv6 address for enp0s3:          2a00:1370:81a8:4ef5:edc6:92b9:e440:efb5
+  IPv6 address for enp0s3:          2a00:1370:81a8:4ef5:a00:27ff:feed:d11a
+  IPv6 address for enp0s3:          fd81:2f4:e5b0:1:a00:27ff:feed:d11a
+
+ * Super-optimized for small spaces - read how we shrank the memory
+   footprint of MicroK8s to make it the smallest full K8s around.
+
+   https://ubuntu.com/blog/microk8s-memory-optimisation
+
+5 updates can be applied immediately.
+To see these additional updates run: apt list --upgradable
+
+
+Last login: Fri Mar 25 18:36:07 2022 from 192.168.1.68
+igor@ubuntu-server:~$ minikube start
+😄  minikube v1.23.2 on Ubuntu 20.04 (vbox/amd64)
+🎉  minikube 1.25.2 is available! Download it: https://github.com/kubernetes/minikube/releases/tag/v1.25.2
+💡  To disable this notice, run: 'minikube config set WantUpdateNotification false'
+
+✨  Using the docker driver based on existing profile
+👍  Starting control plane node minikube in cluster minikube
+🚜  Pulling base image ...
+🔄  Restarting existing docker container for "minikube" ...
+🐳  Preparing Kubernetes v1.22.2 on Docker 20.10.8 ...
+🔎  Verifying Kubernetes components...
+    ▪ Using image k8s.gcr.io/ingress-nginx/controller:v1.0.0-beta.3
+    ▪ Using image gcr.io/k8s-minikube/storage-provisioner:v5
+    ▪ Using image k8s.gcr.io/ingress-nginx/kube-webhook-certgen:v1.0
+    ▪ Using image k8s.gcr.io/ingress-nginx/kube-webhook-certgen:v1.0
+🔎  Verifying ingress addon...
+🌟  Enabled addons: storage-provisioner, default-storageclass, ingress
+🏄  Done! kubectl is now configured to use "minikube" cluster and "default" namespace by default
+igor@ubuntu-server:~$ kubectl get pv
+No resources found
+igor@ubuntu-server:~$ kubectl describe pv
+No resources found in default namespace.
+igor@ubuntu-server:~$ kubectl describe pvc
+Name:          data-database-0
+Namespace:     default
+StorageClass:  csi-ceph-hdd-dp1
+Status:        Pending
+Volume:        
+Labels:        app=database
+Annotations:   <none>
+Finalizers:    [kubernetes.io/pvc-protection]
+Capacity:      
+Access Modes:  
+VolumeMode:    Filesystem
+Used By:       database-0
+Events:
+  Type     Reason              Age                  From                         Message
+  ----     ------              ----                 ----                         -------
+  Warning  ProvisioningFailed  22h (x321 over 23h)  persistentvolume-controller  storageclass.storage.k8s.io "csi-ceph-hdd-dp1" not found
+  Warning  ProvisioningFailed  3m5s (x42 over 13m)  persistentvolume-controller  storageclass.storage.k8s.io "csi-ceph-hdd-dp1" not found
+
+
+Name:          data-prometheus-0
+Namespace:     default
+StorageClass:  csi-ceph-hdd-dp1
+Status:        Pending
+Volume:        
+Labels:        app=prometheus
+Annotations:   <none>
+Finalizers:    [kubernetes.io/pvc-protection]
+Capacity:      
+Access Modes:  
+VolumeMode:    Filesystem
+Used By:       prometheus-0
+Events:
+  Type     Reason              Age                  From                         Message
+  ----     ------              ----                 ----                         -------
+  Warning  ProvisioningFailed  22h (x321 over 23h)  persistentvolume-controller  storageclass.storage.k8s.io "csi-ceph-hdd-dp1" not found
+  Warning  ProvisioningFailed  3m5s (x42 over 13m)  persistentvolume-controller  storageclass.storage.k8s.io "csi-ceph-hdd-dp1" not found
+igor@ubuntu-server:~$ kubectl get pv
+No resources found
+igor@ubuntu-server:~$ kubectl get pvc
+NAME                STATUS    VOLUME   CAPACITY   ACCESS MODES   STORAGECLASS       AGE
+data-database-0     Pending                                      csi-ceph-hdd-dp1   129d
+data-prometheus-0   Pending                                      csi-ceph-hdd-dp1   134d
+igor@ubuntu-server:~$ kubectl describe pvc data-database-0
+Name:          data-database-0
+Namespace:     default
+StorageClass:  csi-ceph-hdd-dp1
+Status:        Pending
+Volume:        
+Labels:        app=database
+Annotations:   <none>
+Finalizers:    [kubernetes.io/pvc-protection]
+Capacity:      
+Access Modes:  
+VolumeMode:    Filesystem
+Used By:       database-0
+Events:
+  Type     Reason              Age                    From                         Message
+  ----     ------              ----                   ----                         -------
+  Warning  ProvisioningFailed  22h (x321 over 23h)    persistentvolume-controller  storageclass.storage.k8s.io "csi-ceph-hdd-dp1" not found
+  Warning  ProvisioningFailed  4m11s (x161 over 44m)  persistentvolume-controller  storageclass.storage.k8s.io "csi-ceph-hdd-dp1" not found
+igor@ubuntu-server:~$ kubectl get pods
+NAME                             READY   STATUS    RESTARTS          AGE
+database-0                       0/1     Pending   0                 129d
+geekbrains-55df48c88d-klqx7      1/1     Running   9 (22h ago)       129d
+geekbrains-55df48c88d-rz2qz      1/1     Running   9 (22h ago)       129d
+gitlab-runner-7467648488-jmlsl   0/1     Running   120 (5m28s ago)   130d
+my-deployment-76499ffb7-5cj6v    1/1     Running   1 (22h ago)       22h
+my-deployment-76499ffb7-5jcmc    1/1     Running   1 (22h ago)       22h
+my-replicaset-47chw              1/1     Running   1 (22h ago)       23h
+my-replicaset-rcb4c              1/1     Running   1 (22h ago)       23h
+my-replicaset-xqjt7              1/1     Running   1 (22h ago)       23h
+node-exporter-n5xqk              1/1     Running   12 (22h ago)      133d
+prometheus-0                     0/1     Pending   0                 134d
+igor@ubuntu-server:~$ kubectl describe pods my-deployment-76499ffb7-5cj6v
+Name:         my-deployment-76499ffb7-5cj6v
+Namespace:    default
+Priority:     0
+Node:         minikube/192.168.49.2
+Start Time:   Fri, 25 Mar 2022 19:32:18 +0000
+Labels:       app=my-app
+              pod-template-hash=76499ffb7
+Annotations:  <none>
+Status:       Running
+IP:           172.17.0.12
+IPs:
+  IP:           172.17.0.12
+Controlled By:  ReplicaSet/my-deployment-76499ffb7
+Containers:
+  nginx:
+    Container ID:   docker://0e8bed52bbd69a18a8e67067eeac784143a8369265f0e87cc887fe1de76973e7
+    Image:          nginx:1.12
+    Image ID:       docker-pullable://nginx@sha256:72daaf46f11cc753c4eab981cbf869919bd1fee3d2170a2adeac12400f494728
+    Port:           80/TCP
+    Host Port:      0/TCP
+    State:          Running
+      Started:      Sat, 26 Mar 2022 17:43:42 +0000
+    Last State:     Terminated
+      Reason:       Completed
+      Exit Code:    0
+      Started:      Fri, 25 Mar 2022 19:32:19 +0000
+      Finished:     Fri, 25 Mar 2022 19:59:15 +0000
+    Ready:          True
+    Restart Count:  1
+    Environment:    <none>
+    Mounts:
+      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-7cwxn (ro)
+Conditions:
+  Type              Status
+  Initialized       True 
+  Ready             True 
+  ContainersReady   True 
+  PodScheduled      True 
+Volumes:
+  kube-api-access-7cwxn:
+    Type:                    Projected (a volume that contains injected data from multiple sources)
+    TokenExpirationSeconds:  3607
+    ConfigMapName:           kube-root-ca.crt
+    ConfigMapOptional:       <nil>
+    DownwardAPI:             true
+QoS Class:                   BestEffort
+Node-Selectors:              <none>
+Tolerations:                 node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
+                             node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
+Events:
+  Type    Reason          Age   From               Message
+  ----    ------          ----  ----               -------
+  Normal  Scheduled       23h   default-scheduler  Successfully assigned default/my-deployment-76499ffb7-5cj6v to minikube
+  Normal  Pulled          23h   kubelet            Container image "nginx:1.12" already present on machine
+  Normal  Created         23h   kubelet            Created container nginx
+  Normal  Started         23h   kubelet            Started container nginx
+  Normal  SandboxChanged  49m   kubelet            Pod sandbox changed, it will be killed and re-created.
+  Normal  Pulled          49m   kubelet            Container image "nginx:1.12" already present on machine
+  Normal  Created         49m   kubelet            Created container nginx
+  Normal  Started         49m   kubelet            Started container nginx
+igor@ubuntu-server:~$ ls
+ app                                                        deployment-redmine.yaml   ingress.yaml             pvc.yaml
+ cicd                                                       deployment_.yaml          kafka                    pv.yaml
+'closer.cgi?path=%2Fkafka%2F3.0.0%2Fkafka_2.12-3.0.0.tgz'   Dockerfile                kafka_2.12-3.0.0         replicaset_.yaml
+'closer.cgi?path=%2Fkafka%2F3.0.0%2Fkafka-3.0.0-src.tgz'    example.sql               kafka-3.0.0-src          serviceaccount.yaml
+ clusterrolebinding.yaml                                    fulldb_before.sql         kubectl.sha256           service-pg.yaml
+ clusterrole.yaml                                           geekbrains                minikube-linux-amd64     service-redmine.yaml
+ configmap.yaml                                             gitlab-runner.yaml        mysql.sql                service.yaml
+ daemonset.yaml                                             help_keyword_report.sql   pod_pv_deployment.yaml   shop7.sql
+ data                                                       id_rsa_gitlab             pod_.yaml                statefulset.yaml
+ deployment-pg.yaml                                         id_rsa_gitlab.pub         pv2.yaml
+igor@ubuntu-server:~$ less pv.yaml
+igor@ubuntu-server:~$ du -fs
+du: invalid option -- 'f'
+Try 'du --help' for more information.
+igor@ubuntu-server:~$ du
+4	./cicd/.git/refs/tags
+8	./cicd/.git/refs/remotes/origin
+12	./cicd/.git/refs/remotes
+8	./cicd/.git/refs/heads
+28	./cicd/.git/refs
+56	./cicd/.git/hooks
+4	./cicd/.git/objects/pack
+12	./cicd/.git/objects/16
+8	./cicd/.git/objects/73
+8	./cicd/.git/objects/18
+8	./cicd/.git/objects/7a
+8	./cicd/.git/objects/48
+4	./cicd/.git/objects/info
+8	./cicd/.git/objects/ab
+8	./cicd/.git/objects/4b
+8	./cicd/.git/objects/96
+80	./cicd/.git/objects
+8	./cicd/.git/info
+4	./cicd/.git/branches
+8	./cicd/.git/logs/refs/remotes/origin
+12	./cicd/.git/logs/refs/remotes
+8	./cicd/.git/logs/refs/heads
+24	./cicd/.git/logs/refs
+32	./cicd/.git/logs
+232	./cicd/.git
+252	./cicd
+4	./.kube/cache/http/.diskv-temp
+2796	./.kube/cache/http
+12	./.kube/cache/discovery/192.168.49.2_8443/v1
+8	./.kube/cache/discovery/192.168.49.2_8443/authentication.k8s.io/v1
+12	./.kube/cache/discovery/192.168.49.2_8443/authentication.k8s.io
+8	./.kube/cache/discovery/192.168.49.2_8443/admissionregistration.k8s.io/v1
+12	./.kube/cache/discovery/192.168.49.2_8443/admissionregistration.k8s.io
+8	./.kube/cache/discovery/192.168.49.2_8443/networking.k8s.io/v1
+12	./.kube/cache/discovery/192.168.49.2_8443/networking.k8s.io
+8	./.kube/cache/discovery/192.168.49.2_8443/batch/v1
+8	./.kube/cache/discovery/192.168.49.2_8443/batch/v1beta1
+20	./.kube/cache/discovery/192.168.49.2_8443/batch
+8	./.kube/cache/discovery/192.168.49.2_8443/coordination.k8s.io/v1
+12	./.kube/cache/discovery/192.168.49.2_8443/coordination.k8s.io
+8	./.kube/cache/discovery/192.168.49.2_8443/policy/v1
+8	./.kube/cache/discovery/192.168.49.2_8443/policy/v1beta1
+20	./.kube/cache/discovery/192.168.49.2_8443/policy
+8	./.kube/cache/discovery/192.168.49.2_8443/events.k8s.io/v1
+8	./.kube/cache/discovery/192.168.49.2_8443/events.k8s.io/v1beta1
+20	./.kube/cache/discovery/192.168.49.2_8443/events.k8s.io
+8	./.kube/cache/discovery/192.168.49.2_8443/discovery.k8s.io/v1
+8	./.kube/cache/discovery/192.168.49.2_8443/discovery.k8s.io/v1beta1
+20	./.kube/cache/discovery/192.168.49.2_8443/discovery.k8s.io
+8	./.kube/cache/discovery/192.168.49.2_8443/autoscaling/v1
+8	./.kube/cache/discovery/192.168.49.2_8443/autoscaling/v2beta1
+8	./.kube/cache/discovery/192.168.49.2_8443/autoscaling/v2beta2
+28	./.kube/cache/discovery/192.168.49.2_8443/autoscaling
+8	./.kube/cache/discovery/192.168.49.2_8443/scheduling.k8s.io/v1
+12	./.kube/cache/discovery/192.168.49.2_8443/scheduling.k8s.io
+8	./.kube/cache/discovery/192.168.49.2_8443/authorization.k8s.io/v1
+12	./.kube/cache/discovery/192.168.49.2_8443/authorization.k8s.io
+8	./.kube/cache/discovery/192.168.49.2_8443/storage.k8s.io/v1
+8	./.kube/cache/discovery/192.168.49.2_8443/storage.k8s.io/v1beta1
+20	./.kube/cache/discovery/192.168.49.2_8443/storage.k8s.io
+8	./.kube/cache/discovery/192.168.49.2_8443/apps/v1
+12	./.kube/cache/discovery/192.168.49.2_8443/apps
+8	./.kube/cache/discovery/192.168.49.2_8443/rbac.authorization.k8s.io/v1
+12	./.kube/cache/discovery/192.168.49.2_8443/rbac.authorization.k8s.io
+8	./.kube/cache/discovery/192.168.49.2_8443/apiregistration.k8s.io/v1
+12	./.kube/cache/discovery/192.168.49.2_8443/apiregistration.k8s.io
+8	./.kube/cache/discovery/192.168.49.2_8443/apiextensions.k8s.io/v1
+12	./.kube/cache/discovery/192.168.49.2_8443/apiextensions.k8s.io
+8	./.kube/cache/discovery/192.168.49.2_8443/certificates.k8s.io/v1
+12	./.kube/cache/discovery/192.168.49.2_8443/certificates.k8s.io
+8	./.kube/cache/discovery/192.168.49.2_8443/flowcontrol.apiserver.k8s.io/v1beta1
+12	./.kube/cache/discovery/192.168.49.2_8443/flowcontrol.apiserver.k8s.io
+8	./.kube/cache/discovery/192.168.49.2_8443/node.k8s.io/v1
+8	./.kube/cache/discovery/192.168.49.2_8443/node.k8s.io/v1beta1
+20	./.kube/cache/discovery/192.168.49.2_8443/node.k8s.io
+312	./.kube/cache/discovery/192.168.49.2_8443
+316	./.kube/cache/discovery
+3116	./.kube/cache
+3124	./.kube
+12	./data
+4	./.cache
+4	./.local/share/nano
+8	./.local/share
+12	./.local
+16	./.ssh
+44	./kafka_2.12-3.0.0/config/kraft
+120	./kafka_2.12-3.0.0/config
+3420	./kafka_2.12-3.0.0/site-docs
+120	./kafka_2.12-3.0.0/bin/windows
+280	./kafka_2.12-3.0.0/bin
+84584	./kafka_2.12-3.0.0/libs
+92	./kafka_2.12-3.0.0/licenses
+112	./kafka_2.12-3.0.0/logs
+88656	./kafka_2.12-3.0.0
+8	./kafka-3.0.0-src/storage/api/src/test/java/org/apache/kafka/server/log/remote/storage
+12	./kafka-3.0.0-src/storage/api/src/test/java/org/apache/kafka/server/log/remote
+16	./kafka-3.0.0-src/storage/api/src/test/java/org/apache/kafka/server/log
+20	./kafka-3.0.0-src/storage/api/src/test/java/org/apache/kafka/server
+24	./kafka-3.0.0-src/storage/api/src/test/java/org/apache/kafka
+28	./kafka-3.0.0-src/storage/api/src/test/java/org/apache
+32	./kafka-3.0.0-src/storage/api/src/test/java/org
+36	./kafka-3.0.0-src/storage/api/src/test/java
+40	./kafka-3.0.0-src/storage/api/src/test
+84	./kafka-3.0.0-src/storage/api/src/main/java/org/apache/kafka/server/log/remote/storage
+88	./kafka-3.0.0-src/storage/api/src/main/java/org/apache/kafka/server/log/remote
+92	./kafka-3.0.0-src/storage/api/src/main/java/org/apache/kafka/server/log
+96	./kafka-3.0.0-src/storage/api/src/main/java/org/apache/kafka/server
+100	./kafka-3.0.0-src/storage/api/src/main/java/org/apache/kafka
+104	./kafka-3.0.0-src/storage/api/src/main/java/org/apache
+108	./kafka-3.0.0-src/storage/api/src/main/java/org
+112	./kafka-3.0.0-src/storage/api/src/main/java
+116	./kafka-3.0.0-src/storage/api/src/main
+160	./kafka-3.0.0-src/storage/api/src
+164	./kafka-3.0.0-src/storage/api
+8	./kafka-3.0.0-src/storage/src/test/resources
+52	./kafka-3.0.0-src/storage/src/test/java/org/apache/kafka/server/log/remote/storage
+44	./kafka-3.0.0-src/storage/src/test/java/org/apache/kafka/server/log/remote/metadata/storage
+48	./kafka-3.0.0-src/storage/src/test/java/org/apache/kafka/server/log/remote/metadata
+104	./kafka-3.0.0-src/storage/src/test/java/org/apache/kafka/server/log/remote
+108	./kafka-3.0.0-src/storage/src/test/java/org/apache/kafka/server/log
+112	./kafka-3.0.0-src/storage/src/test/java/org/apache/kafka/server
+116	./kafka-3.0.0-src/storage/src/test/java/org/apache/kafka
+120	./kafka-3.0.0-src/storage/src/test/java/org/apache
+124	./kafka-3.0.0-src/storage/src/test/java/org
+128	./kafka-3.0.0-src/storage/src/test/java
+140	./kafka-3.0.0-src/storage/src/test
+16	./kafka-3.0.0-src/storage/src/main/resources/message
+20	./kafka-3.0.0-src/storage/src/main/resources
+32	./kafka-3.0.0-src/storage/src/main/java/org/apache/kafka/server/log/remote/storage
+32	./kafka-3.0.0-src/storage/src/main/java/org/apache/kafka/server/log/remote/metadata/storage/serialization
+68	./kafka-3.0.0-src/storage/src/main/java/org/apache/kafka/server/log/remote/metadata/storage
+72	./kafka-3.0.0-src/storage/src/main/java/org/apache/kafka/server/log/remote/metadata
+108	./kafka-3.0.0-src/storage/src/main/java/org/apache/kafka/server/log/remote
+112	./kafka-3.0.0-src/storage/src/main/java/org/apache/kafka/server/log
+116	./kafka-3.0.0-src/storage/src/main/java/org/apache/kafka/server
+120	./kafka-3.0.0-src/storage/src/main/java/org/apache/kafka
+124	./kafka-3.0.0-src/storage/src/main/java/org/apache
+128	./kafka-3.0.0-src/storage/src/main/java/org
+132	./kafka-3.0.0-src/storage/src/main/java
+156	./kafka-3.0.0-src/storage/src/main
+300	./kafka-3.0.0-src/storage/src
+468	./kafka-3.0.0-src/storage
+20	./kafka-3.0.0-src/log4j-appender/src/test/java/org/apache/kafka/log4jappender
+24	./kafka-3.0.0-src/log4j-appender/src/test/java/org/apache/kafka
+28	./kafka-3.0.0-src/log4j-appender/src/test/java/org/apache
+32	./kafka-3.0.0-src/log4j-appender/src/test/java/org
+36	./kafka-3.0.0-src/log4j-appender/src/test/java
+40	./kafka-3.0.0-src/log4j-appender/src/test
+20	./kafka-3.0.0-src/log4j-appender/src/main/java/org/apache/kafka/log4jappender
+24	./kafka-3.0.0-src/log4j-appender/src/main/java/org/apache/kafka
+28	./kafka-3.0.0-src/log4j-appender/src/main/java/org/apache
+32	./kafka-3.0.0-src/log4j-appender/src/main/java/org
+36	./kafka-3.0.0-src/log4j-appender/src/main/java
+40	./kafka-3.0.0-src/log4j-appender/src/main
+84	./kafka-3.0.0-src/log4j-appender/src
+88	./kafka-3.0.0-src/log4j-appender
+60	./kafka-3.0.0-src/docs/images/icons
+3448	./kafka-3.0.0-src/docs/images
+664	./kafka-3.0.0-src/docs/streams/developer-guide
+892	./kafka-3.0.0-src/docs/streams
+60	./kafka-3.0.0-src/docs/documentation/streams/developer-guide
+88	./kafka-3.0.0-src/docs/documentation/streams
+96	./kafka-3.0.0-src/docs/documentation
+8	./kafka-3.0.0-src/docs/js
+5240	./kafka-3.0.0-src/docs
+44	./kafka-3.0.0-src/config/kraft
+120	./kafka-3.0.0-src/config
+64	./kafka-3.0.0-src/generator/src/test/java/org/apache/kafka/message
+68	./kafka-3.0.0-src/generator/src/test/java/org/apache/kafka
+72	./kafka-3.0.0-src/generator/src/test/java/org/apache
+76	./kafka-3.0.0-src/generator/src/test/java/org
+80	./kafka-3.0.0-src/generator/src/test/java
+84	./kafka-3.0.0-src/generator/src/test
+304	./kafka-3.0.0-src/generator/src/main/java/org/apache/kafka/message
+308	./kafka-3.0.0-src/generator/src/main/java/org/apache/kafka
+312	./kafka-3.0.0-src/generator/src/main/java/org/apache
+316	./kafka-3.0.0-src/generator/src/main/java/org
+320	./kafka-3.0.0-src/generator/src/main/java
+324	./kafka-3.0.0-src/generator/src/main
+412	./kafka-3.0.0-src/generator/src
+416	./kafka-3.0.0-src/generator
+12	./kafka-3.0.0-src/streams/upgrade-system-tests-0110/src/test/java/org/apache/kafka/streams/tests
+16	./kafka-3.0.0-src/streams/upgrade-system-tests-0110/src/test/java/org/apache/kafka/streams
+20	./kafka-3.0.0-src/streams/upgrade-system-tests-0110/src/test/java/org/apache/kafka
+24	./kafka-3.0.0-src/streams/upgrade-system-tests-0110/src/test/java/org/apache
+28	./kafka-3.0.0-src/streams/upgrade-system-tests-0110/src/test/java/org
+32	./kafka-3.0.0-src/streams/upgrade-system-tests-0110/src/test/java
+36	./kafka-3.0.0-src/streams/upgrade-system-tests-0110/src/test
+40	./kafka-3.0.0-src/streams/upgrade-system-tests-0110/src
+44	./kafka-3.0.0-src/streams/upgrade-system-tests-0110
+16	./kafka-3.0.0-src/streams/upgrade-system-tests-21/src/test/java/org/apache/kafka/streams/tests
+20	./kafka-3.0.0-src/streams/upgrade-system-tests-21/src/test/java/org/apache/kafka/streams
+24	./kafka-3.0.0-src/streams/upgrade-system-tests-21/src/test/java/org/apache/kafka
+28	./kafka-3.0.0-src/streams/upgrade-system-tests-21/src/test/java/org/apache
+32	./kafka-3.0.0-src/streams/upgrade-system-tests-21/src/test/java/org
+36	./kafka-3.0.0-src/streams/upgrade-system-tests-21/src/test/java
+40	./kafka-3.0.0-src/streams/upgrade-system-tests-21/src/test
+44	./kafka-3.0.0-src/streams/upgrade-system-tests-21/src
+48	./kafka-3.0.0-src/streams/upgrade-system-tests-21
+16	./kafka-3.0.0-src/streams/upgrade-system-tests-0101/src/test/java/org/apache/kafka/streams/tests
+20	./kafka-3.0.0-src/streams/upgrade-system-tests-0101/src/test/java/org/apache/kafka/streams
+24	./kafka-3.0.0-src/streams/upgrade-system-tests-0101/src/test/java/org/apache/kafka
+28	./kafka-3.0.0-src/streams/upgrade-system-tests-0101/src/test/java/org/apache
+32	./kafka-3.0.0-src/streams/upgrade-system-tests-0101/src/test/java/org
+36	./kafka-3.0.0-src/streams/upgrade-system-tests-0101/src/test/java
+40	./kafka-3.0.0-src/streams/upgrade-system-tests-0101/src/test
+44	./kafka-3.0.0-src/streams/upgrade-system-tests-0101/src
+48	./kafka-3.0.0-src/streams/upgrade-system-tests-0101
+12	./kafka-3.0.0-src/streams/upgrade-system-tests-0102/src/test/java/org/apache/kafka/streams/tests
+16	./kafka-3.0.0-src/streams/upgrade-system-tests-0102/src/test/java/org/apache/kafka/streams
+20	./kafka-3.0.0-src/streams/upgrade-system-tests-0102/src/test/java/org/apache/kafka
+24	./kafka-3.0.0-src/streams/upgrade-system-tests-0102/src/test/java/org/apache
+28	./kafka-3.0.0-src/streams/upgrade-system-tests-0102/src/test/java/org
+32	./kafka-3.0.0-src/streams/upgrade-system-tests-0102/src/test/java
+36	./kafka-3.0.0-src/streams/upgrade-system-tests-0102/src/test
+40	./kafka-3.0.0-src/streams/upgrade-system-tests-0102/src
+44	./kafka-3.0.0-src/streams/upgrade-system-tests-0102
+72	./kafka-3.0.0-src/streams/upgrade-system-tests-23/src/test/java/org/apache/kafka/streams/tests
+76	./kafka-3.0.0-src/streams/upgrade-system-tests-23/src/test/java/org/apache/kafka/streams
+80	./kafka-3.0.0-src/streams/upgrade-system-tests-23/src/test/java/org/apache/kafka
+84	./kafka-3.0.0-src/streams/upgrade-system-tests-23/src/test/java/org/apache
+88	./kafka-3.0.0-src/streams/upgrade-system-tests-23/src/test/java/org
+92	./kafka-3.0.0-src/streams/upgrade-system-tests-23/src/test/java
+96	./kafka-3.0.0-src/streams/upgrade-system-tests-23/src/test
+100	./kafka-3.0.0-src/streams/upgrade-system-tests-23/src
+104	./kafka-3.0.0-src/streams/upgrade-system-tests-23
+64	./kafka-3.0.0-src/streams/upgrade-system-tests-27/src/test/java/org/apache/kafka/streams/tests
+68	./kafka-3.0.0-src/streams/upgrade-system-tests-27/src/test/java/org/apache/kafka/streams
+72	./kafka-3.0.0-src/streams/upgrade-system-tests-27/src/test/java/org/apache/kafka
+76	./kafka-3.0.0-src/streams/upgrade-system-tests-27/src/test/java/org/apache
+80	./kafka-3.0.0-src/streams/upgrade-system-tests-27/src/test/java/org
+84	./kafka-3.0.0-src/streams/upgrade-system-tests-27/src/test/java
+88	./kafka-3.0.0-src/streams/upgrade-system-tests-27/src/test
+92	./kafka-3.0.0-src/streams/upgrade-system-tests-27/src
+96	./kafka-3.0.0-src/streams/upgrade-system-tests-27
+8	./kafka-3.0.0-src/streams/test-utils/src/test/resources
+16	./kafka-3.0.0-src/streams/test-utils/src/test/java/org/apache/kafka/streams/test/wordcount
+56	./kafka-3.0.0-src/streams/test-utils/src/test/java/org/apache/kafka/streams/test
+204	./kafka-3.0.0-src/streams/test-utils/src/test/java/org/apache/kafka/streams
+208	./kafka-3.0.0-src/streams/test-utils/src/test/java/org/apache/kafka
+212	./kafka-3.0.0-src/streams/test-utils/src/test/java/org/apache
+216	./kafka-3.0.0-src/streams/test-utils/src/test/java/org
+220	./kafka-3.0.0-src/streams/test-utils/src/test/java
+232	./kafka-3.0.0-src/streams/test-utils/src/test
+12	./kafka-3.0.0-src/streams/test-utils/src/main/java/org/apache/kafka/streams/test
+24	./kafka-3.0.0-src/streams/test-utils/src/main/java/org/apache/kafka/streams/processor/api
+52	./kafka-3.0.0-src/streams/test-utils/src/main/java/org/apache/kafka/streams/processor
+152	./kafka-3.0.0-src/streams/test-utils/src/main/java/org/apache/kafka/streams
+156	./kafka-3.0.0-src/streams/test-utils/src/main/java/org/apache/kafka
+160	./kafka-3.0.0-src/streams/test-utils/src/main/java/org/apache
+164	./kafka-3.0.0-src/streams/test-utils/src/main/java/org
+168	./kafka-3.0.0-src/streams/test-utils/src/main/java
+172	./kafka-3.0.0-src/streams/test-utils/src/main
+408	./kafka-3.0.0-src/streams/test-utils/src
+412	./kafka-3.0.0-src/streams/test-utils
+64	./kafka-3.0.0-src/streams/upgrade-system-tests-24/src/test/java/org/apache/kafka/streams/tests
+68	./kafka-3.0.0-src/streams/upgrade-system-tests-24/src/test/java/org/apache/kafka/streams
+72	./kafka-3.0.0-src/streams/upgrade-system-tests-24/src/test/java/org/apache/kafka
+76	./kafka-3.0.0-src/streams/upgrade-system-tests-24/src/test/java/org/apache
+80	./kafka-3.0.0-src/streams/upgrade-system-tests-24/src/test/java/org
+84	./kafka-3.0.0-src/streams/upgrade-system-tests-24/src/test/java
+88	./kafka-3.0.0-src/streams/upgrade-system-tests-24/src/test
+92	./kafka-3.0.0-src/streams/upgrade-system-tests-24/src
+96	./kafka-3.0.0-src/streams/upgrade-system-tests-24
+12	./kafka-3.0.0-src/streams/quickstart/java/src/test/resources/projects/basic
+16	./kafka-3.0.0-src/streams/quickstart/java/src/test/resources/projects
+20	./kafka-3.0.0-src/streams/quickstart/java/src/test/resources
+24	./kafka-3.0.0-src/streams/quickstart/java/src/test
+8	./kafka-3.0.0-src/streams/quickstart/java/src/main/resources/META-INF/maven
+12	./kafka-3.0.0-src/streams/quickstart/java/src/main/resources/META-INF
+8	./kafka-3.0.0-src/streams/quickstart/java/src/main/resources/archetype-resources/src/main/resources
+16	./kafka-3.0.0-src/streams/quickstart/java/src/main/resources/archetype-resources/src/main/java
+28	./kafka-3.0.0-src/streams/quickstart/java/src/main/resources/archetype-resources/src/main
+32	./kafka-3.0.0-src/streams/quickstart/java/src/main/resources/archetype-resources/src
+44	./kafka-3.0.0-src/streams/quickstart/java/src/main/resources/archetype-resources
+60	./kafka-3.0.0-src/streams/quickstart/java/src/main/resources
+64	./kafka-3.0.0-src/streams/quickstart/java/src/main
+92	./kafka-3.0.0-src/streams/quickstart/java/src
+100	./kafka-3.0.0-src/streams/quickstart/java
+112	./kafka-3.0.0-src/streams/quickstart
+8	./kafka-3.0.0-src/streams/streams-scala/src/test/resources
+20	./kafka-3.0.0-src/streams/streams-scala/src/test/scala/org/apache/kafka/streams/scala/utils
+80	./kafka-3.0.0-src/streams/streams-scala/src/test/scala/org/apache/kafka/streams/scala/kstream
+144	./kafka-3.0.0-src/streams/streams-scala/src/test/scala/org/apache/kafka/streams/scala
+148	./kafka-3.0.0-src/streams/streams-scala/src/test/scala/org/apache/kafka/streams
+152	./kafka-3.0.0-src/streams/streams-scala/src/test/scala/org/apache/kafka
+156	./kafka-3.0.0-src/streams/streams-scala/src/test/scala/org/apache
+160	./kafka-3.0.0-src/streams/streams-scala/src/test/scala/org
+164	./kafka-3.0.0-src/streams/streams-scala/src/test/scala
+176	./kafka-3.0.0-src/streams/streams-scala/src/test
+220	./kafka-3.0.0-src/streams/streams-scala/src/main/scala/org/apache/kafka/streams/scala/kstream
+8	./kafka-3.0.0-src/streams/streams-scala/src/main/scala/org/apache/kafka/streams/scala/serialization
+268	./kafka-3.0.0-src/streams/streams-scala/src/main/scala/org/apache/kafka/streams/scala
+272	./kafka-3.0.0-src/streams/streams-scala/src/main/scala/org/apache/kafka/streams
+276	./kafka-3.0.0-src/streams/streams-scala/src/main/scala/org/apache/kafka
+280	./kafka-3.0.0-src/streams/streams-scala/src/main/scala/org/apache
+284	./kafka-3.0.0-src/streams/streams-scala/src/main/scala/org
+288	./kafka-3.0.0-src/streams/streams-scala/src/main/scala
+292	./kafka-3.0.0-src/streams/streams-scala/src/main
+472	./kafka-3.0.0-src/streams/streams-scala/src
+480	./kafka-3.0.0-src/streams/streams-scala
+16	./kafka-3.0.0-src/streams/upgrade-system-tests-0100/src/test/java/org/apache/kafka/streams/tests
+20	./kafka-3.0.0-src/streams/upgrade-system-tests-0100/src/test/java/org/apache/kafka/streams
+24	./kafka-3.0.0-src/streams/upgrade-system-tests-0100/src/test/java/org/apache/kafka
+28	./kafka-3.0.0-src/streams/upgrade-system-tests-0100/src/test/java/org/apache
+32	./kafka-3.0.0-src/streams/upgrade-system-tests-0100/src/test/java/org
+36	./kafka-3.0.0-src/streams/upgrade-system-tests-0100/src/test/java
+40	./kafka-3.0.0-src/streams/upgrade-system-tests-0100/src/test
+44	./kafka-3.0.0-src/streams/upgrade-system-tests-0100/src
+48	./kafka-3.0.0-src/streams/upgrade-system-tests-0100
+64	./kafka-3.0.0-src/streams/upgrade-system-tests-25/src/test/java/org/apache/kafka/streams/tests
+68	./kafka-3.0.0-src/streams/upgrade-system-tests-25/src/test/java/org/apache/kafka/streams
+72	./kafka-3.0.0-src/streams/upgrade-system-tests-25/src/test/java/org/apache/kafka
+76	./kafka-3.0.0-src/streams/upgrade-system-tests-25/src/test/java/org/apache
+80	./kafka-3.0.0-src/streams/upgrade-system-tests-25/src/test/java/org
+84	./kafka-3.0.0-src/streams/upgrade-system-tests-25/src/test/java
+88	./kafka-3.0.0-src/streams/upgrade-system-tests-25/src/test
+92	./kafka-3.0.0-src/streams/upgrade-system-tests-25/src
+96	./kafka-3.0.0-src/streams/upgrade-system-tests-25
+64	./kafka-3.0.0-src/streams/upgrade-system-tests-28/src/test/java/org/apache/kafka/streams/tests
+68	./kafka-3.0.0-src/streams/upgrade-system-tests-28/src/test/java/org/apache/kafka/streams
+72	./kafka-3.0.0-src/streams/upgrade-system-tests-28/src/test/java/org/apache/kafka
+76	./kafka-3.0.0-src/streams/upgrade-system-tests-28/src/test/java/org/apache
+80	./kafka-3.0.0-src/streams/upgrade-system-tests-28/src/test/java/org
+84	./kafka-3.0.0-src/streams/upgrade-system-tests-28/src/test/java
+88	./kafka-3.0.0-src/streams/upgrade-system-tests-28/src/test
+92	./kafka-3.0.0-src/streams/upgrade-system-tests-28/src
+96	./kafka-3.0.0-src/streams/upgrade-system-tests-28
+16	./kafka-3.0.0-src/streams/upgrade-system-tests-10/src/test/java/org/apache/kafka/streams/tests
+20	./kafka-3.0.0-src/streams/upgrade-system-tests-10/src/test/java/org/apache/kafka/streams
+24	./kafka-3.0.0-src/streams/upgrade-system-tests-10/src/test/java/org/apache/kafka
+28	./kafka-3.0.0-src/streams/upgrade-system-tests-10/src/test/java/org/apache
+32	./kafka-3.0.0-src/streams/upgrade-system-tests-10/src/test/java/org
+36	./kafka-3.0.0-src/streams/upgrade-system-tests-10/src/test/java
+40	./kafka-3.0.0-src/streams/upgrade-system-tests-10/src/test
+44	./kafka-3.0.0-src/streams/upgrade-system-tests-10/src
+48	./kafka-3.0.0-src/streams/upgrade-system-tests-10
+64	./kafka-3.0.0-src/streams/upgrade-system-tests-26/src/test/java/org/apache/kafka/streams/tests
+68	./kafka-3.0.0-src/streams/upgrade-system-tests-26/src/test/java/org/apache/kafka/streams
+72	./kafka-3.0.0-src/streams/upgrade-system-tests-26/src/test/java/org/apache/kafka
+76	./kafka-3.0.0-src/streams/upgrade-system-tests-26/src/test/java/org/apache
+80	./kafka-3.0.0-src/streams/upgrade-system-tests-26/src/test/java/org
+84	./kafka-3.0.0-src/streams/upgrade-system-tests-26/src/test/java
+88	./kafka-3.0.0-src/streams/upgrade-system-tests-26/src/test
+92	./kafka-3.0.0-src/streams/upgrade-system-tests-26/src
+96	./kafka-3.0.0-src/streams/upgrade-system-tests-26
+12	./kafka-3.0.0-src/streams/examples/src/test/java/org/apache/kafka/streams/examples/docs
+24	./kafka-3.0.0-src/streams/examples/src/test/java/org/apache/kafka/streams/examples/wordcount
+40	./kafka-3.0.0-src/streams/examples/src/test/java/org/apache/kafka/streams/examples
+44	./kafka-3.0.0-src/streams/examples/src/test/java/org/apache/kafka/streams
+48	./kafka-3.0.0-src/streams/examples/src/test/java/org/apache/kafka
+52	./kafka-3.0.0-src/streams/examples/src/test/java/org/apache
+56	./kafka-3.0.0-src/streams/examples/src/test/java/org
+60	./kafka-3.0.0-src/streams/examples/src/test/java
+64	./kafka-3.0.0-src/streams/examples/src/test
+12	./kafka-3.0.0-src/streams/examples/src/main/java/org/apache/kafka/streams/examples/temperature
+28	./kafka-3.0.0-src/streams/examples/src/main/java/org/apache/kafka/streams/examples/pageview
+8	./kafka-3.0.0-src/streams/examples/src/main/java/org/apache/kafka/streams/examples/pipe
+28	./kafka-3.0.0-src/streams/examples/src/main/java/org/apache/kafka/streams/examples/wordcount
+80	./kafka-3.0.0-src/streams/examples/src/main/java/org/apache/kafka/streams/examples
+84	./kafka-3.0.0-src/streams/examples/src/main/java/org/apache/kafka/streams
+88	./kafka-3.0.0-src/streams/examples/src/main/java/org/apache/kafka
+92	./kafka-3.0.0-src/streams/examples/src/main/java/org/apache
+96	./kafka-3.0.0-src/streams/examples/src/main/java/org
+100	./kafka-3.0.0-src/streams/examples/src/main/java
+104	./kafka-3.0.0-src/streams/examples/src/main
+172	./kafka-3.0.0-src/streams/examples/src
+176	./kafka-3.0.0-src/streams/examples
+8	./kafka-3.0.0-src/streams/src/test/resources/kafka
+16	./kafka-3.0.0-src/streams/src/test/resources
+200	./kafka-3.0.0-src/streams/src/test/java/org/apache/kafka/test
+12	./kafka-3.0.0-src/streams/src/test/java/org/apache/kafka/streams/utils
+56	./kafka-3.0.0-src/streams/src/test/java/org/apache/kafka/streams/kstream/internals/graph
+44	./kafka-3.0.0-src/streams/src/test/java/org/apache/kafka/streams/kstream/internals/suppress
+36	./kafka-3.0.0-src/streams/src/test/java/org/apache/kafka/streams/kstream/internals/foreignkeyjoin
+1412	./kafka-3.0.0-src/streams/src/test/java/org/apache/kafka/streams/kstream/internals
+1556	./kafka-3.0.0-src/streams/src/test/java/org/apache/kafka/streams/kstream
+12	./kafka-3.0.0-src/streams/src/test/java/org/apache/kafka/streams/internals/metrics
+24	./kafka-3.0.0-src/streams/src/test/java/org/apache/kafka/streams/internals
+104	./kafka-3.0.0-src/streams/src/test/java/org/apache/kafka/streams/state/internals/metrics
+1224	./kafka-3.0.0-src/streams/src/test/java/org/apache/kafka/streams/state/internals
+1288	./kafka-3.0.0-src/streams/src/test/java/org/apache/kafka/streams/state
+248	./kafka-3.0.0-src/streams/src/test/java/org/apache/kafka/streams/tests
+96	./kafka-3.0.0-src/streams/src/test/java/org/apache/kafka/streams/processor/internals/metrics
+16	./kafka-3.0.0-src/streams/src/test/java/org/apache/kafka/streams/processor/internals/testutil
+228	./kafka-3.0.0-src/streams/src/test/java/org/apache/kafka/streams/processor/internals/assignment
+1864	./kafka-3.0.0-src/streams/src/test/java/org/apache/kafka/streams/processor/internals
+1888	./kafka-3.0.0-src/streams/src/test/java/org/apache/kafka/streams/processor
+104	./kafka-3.0.0-src/streams/src/test/java/org/apache/kafka/streams/integration/utils
+1180	./kafka-3.0.0-src/streams/src/test/java/org/apache/kafka/streams/integration
+8	./kafka-3.0.0-src/streams/src/test/java/org/apache/kafka/streams/errors
+20	./kafka-3.0.0-src/streams/src/test/java/org/apache/kafka/streams/tools
+6496	./kafka-3.0.0-src/streams/src/test/java/org/apache/kafka/streams
+8	./kafka-3.0.0-src/streams/src/test/java/org/apache/kafka/common/metrics
+12	./kafka-3.0.0-src/streams/src/test/java/org/apache/kafka/common
+6712	./kafka-3.0.0-src/streams/src/test/java/org/apache/kafka
+6716	./kafka-3.0.0-src/streams/src/test/java/org/apache
+6720	./kafka-3.0.0-src/streams/src/test/java/org
+6724	./kafka-3.0.0-src/streams/src/test/java
+6744	./kafka-3.0.0-src/streams/src/test
+8	./kafka-3.0.0-src/streams/src/main/resources/common/message
+12	./kafka-3.0.0-src/streams/src/main/resources/common
+16	./kafka-3.0.0-src/streams/src/main/resources
+144	./kafka-3.0.0-src/streams/src/main/java/org/apache/kafka/streams/kstream/internals/graph
+56	./kafka-3.0.0-src/streams/src/main/java/org/apache/kafka/streams/kstream/internals/suppress
+84	./kafka-3.0.0-src/streams/src/main/java/org/apache/kafka/streams/kstream/internals/foreignkeyjoin
+1032	./kafka-3.0.0-src/streams/src/main/java/org/apache/kafka/streams/kstream/internals
+2028	./kafka-3.0.0-src/streams/src/main/java/org/apache/kafka/streams/kstream
+12	./kafka-3.0.0-src/streams/src/main/java/org/apache/kafka/streams/internals/metrics
+24	./kafka-3.0.0-src/streams/src/main/java/org/apache/kafka/streams/internals
+104	./kafka-3.0.0-src/streams/src/main/java/org/apache/kafka/streams/state/internals/metrics
+1044	./kafka-3.0.0-src/streams/src/main/java/org/apache/kafka/streams/state/internals
+1220	./kafka-3.0.0-src/streams/src/main/java/org/apache/kafka/streams/state
+92	./kafka-3.0.0-src/streams/src/main/java/org/apache/kafka/streams/processor/internals/metrics
+168	./kafka-3.0.0-src/streams/src/main/java/org/apache/kafka/streams/processor/internals/assignment
+16	./kafka-3.0.0-src/streams/src/main/java/org/apache/kafka/streams/processor/internals/namedtopology
+1276	./kafka-3.0.0-src/streams/src/main/java/org/apache/kafka/streams/processor/internals
+40	./kafka-3.0.0-src/streams/src/main/java/org/apache/kafka/streams/processor/api
+1460	./kafka-3.0.0-src/streams/src/main/java/org/apache/kafka/streams/processor
+96	./kafka-3.0.0-src/streams/src/main/java/org/apache/kafka/streams/errors
+5152	./kafka-3.0.0-src/streams/src/main/java/org/apache/kafka/streams
+5156	./kafka-3.0.0-src/streams/src/main/java/org/apache/kafka
+5160	./kafka-3.0.0-src/streams/src/main/java/org/apache
+5164	./kafka-3.0.0-src/streams/src/main/java/org
+5168	./kafka-3.0.0-src/streams/src/main/java
+5188	./kafka-3.0.0-src/streams/src/main
+11936	./kafka-3.0.0-src/streams/src
+16	./kafka-3.0.0-src/streams/upgrade-system-tests-11/src/test/java/org/apache/kafka/streams/tests
+20	./kafka-3.0.0-src/streams/upgrade-system-tests-11/src/test/java/org/apache/kafka/streams
+24	./kafka-3.0.0-src/streams/upgrade-system-tests-11/src/test/java/org/apache/kafka
+28	./kafka-3.0.0-src/streams/upgrade-system-tests-11/src/test/java/org/apache
+32	./kafka-3.0.0-src/streams/upgrade-system-tests-11/src/test/java/org
+36	./kafka-3.0.0-src/streams/upgrade-system-tests-11/src/test/java
+40	./kafka-3.0.0-src/streams/upgrade-system-tests-11/src/test
+44	./kafka-3.0.0-src/streams/upgrade-system-tests-11/src
+48	./kafka-3.0.0-src/streams/upgrade-system-tests-11
+16	./kafka-3.0.0-src/streams/upgrade-system-tests-20/src/test/java/org/apache/kafka/streams/tests
+20	./kafka-3.0.0-src/streams/upgrade-system-tests-20/src/test/java/org/apache/kafka/streams
+24	./kafka-3.0.0-src/streams/upgrade-system-tests-20/src/test/java/org/apache/kafka
+28	./kafka-3.0.0-src/streams/upgrade-system-tests-20/src/test/java/org/apache
+32	./kafka-3.0.0-src/streams/upgrade-system-tests-20/src/test/java/org
+36	./kafka-3.0.0-src/streams/upgrade-system-tests-20/src/test/java
+40	./kafka-3.0.0-src/streams/upgrade-system-tests-20/src/test
+44	./kafka-3.0.0-src/streams/upgrade-system-tests-20/src
+48	./kafka-3.0.0-src/streams/upgrade-system-tests-20
+72	./kafka-3.0.0-src/streams/upgrade-system-tests-22/src/test/java/org/apache/kafka/streams/tests
+76	./kafka-3.0.0-src/streams/upgrade-system-tests-22/src/test/java/org/apache/kafka/streams
+80	./kafka-3.0.0-src/streams/upgrade-system-tests-22/src/test/java/org/apache/kafka
+84	./kafka-3.0.0-src/streams/upgrade-system-tests-22/src/test/java/org/apache
+88	./kafka-3.0.0-src/streams/upgrade-system-tests-22/src/test/java/org
+92	./kafka-3.0.0-src/streams/upgrade-system-tests-22/src/test/java
+96	./kafka-3.0.0-src/streams/upgrade-system-tests-22/src/test
+100	./kafka-3.0.0-src/streams/upgrade-system-tests-22/src
+104	./kafka-3.0.0-src/streams/upgrade-system-tests-22
+14188	./kafka-3.0.0-src/streams
+16	./kafka-3.0.0-src/clients/src/test/resources/serializedData
+12	./kafka-3.0.0-src/clients/src/test/resources/common/message
+16	./kafka-3.0.0-src/clients/src/test/resources/common
+40	./kafka-3.0.0-src/clients/src/test/resources
+140	./kafka-3.0.0-src/clients/src/test/java/org/apache/kafka/test
+264	./kafka-3.0.0-src/clients/src/test/java/org/apache/kafka/common/record
+236	./kafka-3.0.0-src/clients/src/test/java/org/apache/kafka/common/utils
+32	./kafka-3.0.0-src/clients/src/test/java/org/apache/kafka/common/acl
+24	./kafka-3.0.0-src/clients/src/test/java/org/apache/kafka/common/config/provider
+116	./kafka-3.0.0-src/clients/src/test/java/org/apache/kafka/common/config
+12	./kafka-3.0.0-src/clients/src/test/java/org/apache/kafka/common/memory
+48	./kafka-3.0.0-src/clients/src/test/java/org/apache/kafka/common/serialization
+20	./kafka-3.0.0-src/clients/src/test/java/org/apache/kafka/common/internals
+40	./kafka-3.0.0-src/clients/src/test/java/org/apache/kafka/common/protocol/types
+68	./kafka-3.0.0-src/clients/src/test/java/org/apache/kafka/common/protocol
+12	./kafka-3.0.0-src/clients/src/test/java/org/apache/kafka/common/metrics/internals
+28	./kafka-3.0.0-src/clients/src/test/java/org/apache/kafka/common/metrics/stats
+140	./kafka-3.0.0-src/clients/src/test/java/org/apache/kafka/common/metrics
+8	./kafka-3.0.0-src/clients/src/test/java/org/apache/kafka/common/cache
+524	./kafka-3.0.0-src/clients/src/test/java/org/apache/kafka/common/requests
+92	./kafka-3.0.0-src/clients/src/test/java/org/apache/kafka/common/message
+20	./kafka-3.0.0-src/clients/src/test/java/org/apache/kafka/common/compress
+16	./kafka-3.0.0-src/clients/src/test/java/org/apache/kafka/common/security/kerberos
+20	./kafka-3.0.0-src/clients/src/test/java/org/apache/kafka/common/security/auth
+40	./kafka-3.0.0-src/clients/src/test/java/org/apache/kafka/common/security/scram/internals
+44	./kafka-3.0.0-src/clients/src/test/java/org/apache/kafka/common/security/scram
+36	./kafka-3.0.0-src/clients/src/test/java/org/apache/kafka/common/security/ssl/mock
+104	./kafka-3.0.0-src/clients/src/test/java/org/apache/kafka/common/security/ssl
+196	./kafka-3.0.0-src/clients/src/test/java/org/apache/kafka/common/security/authenticator
+56	./kafka-3.0.0-src/clients/src/test/java/org/apache/kafka/common/security/oauthbearer/internals/unsecured
+48	./kafka-3.0.0-src/clients/src/test/java/org/apache/kafka/common/security/oauthbearer/internals/expiring
+136	./kafka-3.0.0-src/clients/src/test/java/org/apache/kafka/common/security/oauthbearer/internals
+184	./kafka-3.0.0-src/clients/src/test/java/org/apache/kafka/common/security/oauthbearer
+12	./kafka-3.0.0-src/clients/src/test/java/org/apache/kafka/common/security/plain/internals
+16	./kafka-3.0.0-src/clients/src/test/java/org/apache/kafka/common/security/plain
+608	./kafka-3.0.0-src/clients/src/test/java/org/apache/kafka/common/security
+8	./kafka-3.0.0-src/clients/src/test/java/org/apache/kafka/common/replica
+28	./kafka-3.0.0-src/clients/src/test/java/org/apache/kafka/common/feature
+8	./kafka-3.0.0-src/clients/src/test/java/org/apache/kafka/common/resource
+12	./kafka-3.0.0-src/clients/src/test/java/org/apache/kafka/common/header/internals
+16	./kafka-3.0.0-src/clients/src/test/java/org/apache/kafka/common/header
+256	./kafka-3.0.0-src/clients/src/test/java/org/apache/kafka/common/network
+2560	./kafka-3.0.0-src/clients/src/test/java/org/apache/kafka/common
+208	./kafka-3.0.0-src/clients/src/test/java/org/apache/kafka/clients/admin/internals
+660	./kafka-3.0.0-src/clients/src/test/java/org/apache/kafka/clients/admin
+
+636	./kafka-3.0.0-src/clients/src/test/java/org/apache/kafka/clients/consumer/internals
+884	./kafka-3.0.0-src/clients/src/test/java/org/apache/kafka/clients/consumer
+472	./kafka-3.0.0-src/clients/src/test/java/org/apache/kafka/clients/producer/internals
+616	./kafka-3.0.0-src/clients/src/test/java/org/apache/kafka/clients/producer
+2384	./kafka-3.0.0-src/clients/src/test/java/org/apache/kafka/clients
+5088	./kafka-3.0.0-src/clients/src/test/java/org/apache/kafka
+5092	./kafka-3.0.0-src/clients/src/test/java/org/apache
+5096	./kafka-3.0.0-src/clients/src/test/java/org
+5100	./kafka-3.0.0-src/clients/src/test/java
+5144	./kafka-3.0.0-src/clients/src/test
+628	./kafka-3.0.0-src/clients/src/main/resources/common/message
+632	./kafka-3.0.0-src/clients/src/main/resources/common
+8	./kafka-3.0.0-src/clients/src/main/resources/META-INF/services
+12	./kafka-3.0.0-src/clients/src/main/resources/META-INF
+648	./kafka-3.0.0-src/clients/src/main/resources
+404	./kafka-3.0.0-src/clients/src/main/java/org/apache/kafka/common/record
+380	./kafka-3.0.0-src/clients/src/main/java/org/apache/kafka/common/utils
+40	./kafka-3.0.0-src/clients/src/main/java/org/apache/kafka/common/acl
+20	./kafka-3.0.0-src/clients/src/main/java/org/apache/kafka/common/config/internals
+8	./kafka-3.0.0-src/clients/src/main/java/org/apache/kafka/common/config/types
+16	./kafka-3.0.0-src/clients/src/main/java/org/apache/kafka/common/config/provider
+244	./kafka-3.0.0-src/clients/src/main/java/org/apache/kafka/common/config
+24	./kafka-3.0.0-src/clients/src/main/java/org/apache/kafka/common/memory
+136	./kafka-3.0.0-src/clients/src/main/java/org/apache/kafka/common/serialization
+40	./kafka-3.0.0-src/clients/src/main/java/org/apache/kafka/common/internals
+116	./kafka-3.0.0-src/clients/src/main/java/org/apache/kafka/common/protocol/types
+228	./kafka-3.0.0-src/clients/src/main/java/org/apache/kafka/common/protocol
+20	./kafka-3.0.0-src/clients/src/main/java/org/apache/kafka/common/metrics/internals
+104	./kafka-3.0.0-src/clients/src/main/java/org/apache/kafka/common/metrics/stats
+244	./kafka-3.0.0-src/clients/src/main/java/org/apache/kafka/common/metrics
+16	./kafka-3.0.0-src/clients/src/main/java/org/apache/kafka/common/cache
+940	./kafka-3.0.0-src/clients/src/main/java/org/apache/kafka/common/requests
+40	./kafka-3.0.0-src/clients/src/main/java/org/apache/kafka/common/compress
+64	./kafka-3.0.0-src/clients/src/main/java/org/apache/kafka/common/security/kerberos
+68	./kafka-3.0.0-src/clients/src/main/java/org/apache/kafka/common/security/auth
+80	./kafka-3.0.0-src/clients/src/main/java/org/apache/kafka/common/security/scram/internals
+100	./kafka-3.0.0-src/clients/src/main/java/org/apache/kafka/common/security/scram
+68	./kafka-3.0.0-src/clients/src/main/java/org/apache/kafka/common/security/ssl
+16	./kafka-3.0.0-src/clients/src/main/java/org/apache/kafka/common/security/token/delegation/internals
+32	./kafka-3.0.0-src/clients/src/main/java/org/apache/kafka/common/security/token/delegation
+36	./kafka-3.0.0-src/clients/src/main/java/org/apache/kafka/common/security/token
+132	./kafka-3.0.0-src/clients/src/main/java/org/apache/kafka/common/security/authenticator
+80	./kafka-3.0.0-src/clients/src/main/java/org/apache/kafka/common/security/oauthbearer/internals/unsecured
+40	./kafka-3.0.0-src/clients/src/main/java/org/apache/kafka/common/security/oauthbearer/internals/expiring
+180	./kafka-3.0.0-src/clients/src/main/java/org/apache/kafka/common/security/oauthbearer/internals
+236	./kafka-3.0.0-src/clients/src/main/java/org/apache/kafka/common/security/oauthbearer
+20	./kafka-3.0.0-src/clients/src/main/java/org/apache/kafka/common/security/plain/internals
+32	./kafka-3.0.0-src/clients/src/main/java/org/apache/kafka/common/security/plain
+764	./kafka-3.0.0-src/clients/src/main/java/org/apache/kafka/common/security
+24	./kafka-3.0.0-src/clients/src/main/java/org/apache/kafka/common/replica
+28	./kafka-3.0.0-src/clients/src/main/java/org/apache/kafka/common/feature
+20	./kafka-3.0.0-src/clients/src/main/java/org/apache/kafka/common/quota
+32	./kafka-3.0.0-src/clients/src/main/java/org/apache/kafka/common/resource
+16	./kafka-3.0.0-src/clients/src/main/java/org/apache/kafka/common/header/internals
+28	./kafka-3.0.0-src/clients/src/main/java/org/apache/kafka/common/header
+316	./kafka-3.0.0-src/clients/src/main/java/org/apache/kafka/common/network
+488	./kafka-3.0.0-src/clients/src/main/java/org/apache/kafka/common/errors
+8	./kafka-3.0.0-src/clients/src/main/java/org/apache/kafka/common/annotation
+4580	./kafka-3.0.0-src/clients/src/main/java/org/apache/kafka/common
+200	./kafka-3.0.0-src/clients/src/main/java/org/apache/kafka/clients/admin/internals
+1052	./kafka-3.0.0-src/clients/src/main/java/org/apache/kafka/clients/admin
+508	./kafka-3.0.0-src/clients/src/main/java/org/apache/kafka/clients/consumer/internals
+872	./kafka-3.0.0-src/clients/src/main/java/org/apache/kafka/clients/consumer
+288	./kafka-3.0.0-src/clients/src/main/java/org/apache/kafka/clients/producer/internals
+484	./kafka-3.0.0-src/clients/src/main/java/org/apache/kafka/clients/producer
+2680	./kafka-3.0.0-src/clients/src/main/java/org/apache/kafka/clients
+48	./kafka-3.0.0-src/clients/src/main/java/org/apache/kafka/server/authorizer
+16	./kafka-3.0.0-src/clients/src/main/java/org/apache/kafka/server/policy
+20	./kafka-3.0.0-src/clients/src/main/java/org/apache/kafka/server/quota
+88	./kafka-3.0.0-src/clients/src/main/java/org/apache/kafka/server
+7352	./kafka-3.0.0-src/clients/src/main/java/org/apache/kafka
+7356	./kafka-3.0.0-src/clients/src/main/java/org/apache
+7360	./kafka-3.0.0-src/clients/src/main/java/org
+7364	./kafka-3.0.0-src/clients/src/main/java
+8016	./kafka-3.0.0-src/clients/src/main
+13164	./kafka-3.0.0-src/clients/src
+13172	./kafka-3.0.0-src/clients
+120	./kafka-3.0.0-src/bin/windows
+280	./kafka-3.0.0-src/bin
+44	./kafka-3.0.0-src/tests/kafkatest/sanity_checks
+20	./kafka-3.0.0-src/tests/kafkatest/utils
+16	./kafka-3.0.0-src/tests/kafkatest/directory_layout
+28	./kafka-3.0.0-src/tests/kafkatest/services/monitor
+16	./kafka-3.0.0-src/tests/kafkatest/services/security/templates
+72	./kafka-3.0.0-src/tests/kafkatest/services/security
+8	./kafka-3.0.0-src/tests/kafkatest/services/performance/templates
+44	./kafka-3.0.0-src/tests/kafkatest/services/performance
+8	./kafka-3.0.0-src/tests/kafkatest/services/trogdor/templates
+76	./kafka-3.0.0-src/tests/kafkatest/services/trogdor
+20	./kafka-3.0.0-src/tests/kafkatest/services/kafka/templates
+148	./kafka-3.0.0-src/tests/kafkatest/services/kafka
+32	./kafka-3.0.0-src/tests/kafkatest/services/templates
+616	./kafka-3.0.0-src/tests/kafkatest/services
+24	./kafka-3.0.0-src/tests/kafkatest/benchmarks/core
+32	./kafka-3.0.0-src/tests/kafkatest/benchmarks
+12	./kafka-3.0.0-src/tests/kafkatest/tests/streams/utils
+8	./kafka-3.0.0-src/tests/kafkatest/tests/streams/templates
+212	./kafka-3.0.0-src/tests/kafkatest/tests/streams
+24	./kafka-3.0.0-src/tests/kafkatest/tests/connect/templates
+92	./kafka-3.0.0-src/tests/kafkatest/tests/connect
+100	./kafka-3.0.0-src/tests/kafkatest/tests/client
+296	./kafka-3.0.0-src/tests/kafkatest/tests/core
+40	./kafka-3.0.0-src/tests/kafkatest/tests/tools
+776	./kafka-3.0.0-src/tests/kafkatest/tests
+1520	./kafka-3.0.0-src/tests/kafkatest
+12	./kafka-3.0.0-src/tests/unit/directory_layout
+12	./kafka-3.0.0-src/tests/unit/version
+36	./kafka-3.0.0-src/tests/unit
+12	./kafka-3.0.0-src/tests/bin
+28	./kafka-3.0.0-src/tests/spec
+20	./kafka-3.0.0-src/tests/docker/ssh
+64	./kafka-3.0.0-src/tests/docker
+1708	./kafka-3.0.0-src/tests
+16	./kafka-3.0.0-src/server-common/src/test/java/org/apache/kafka/queue
+20	./kafka-3.0.0-src/server-common/src/test/java/org/apache/kafka
+24	./kafka-3.0.0-src/server-common/src/test/java/org/apache
+28	./kafka-3.0.0-src/server-common/src/test/java/org
+32	./kafka-3.0.0-src/server-common/src/test/java
+36	./kafka-3.0.0-src/server-common/src/test
+32	./kafka-3.0.0-src/server-common/src/main/java/org/apache/kafka/queue
+24	./kafka-3.0.0-src/server-common/src/main/java/org/apache/kafka/server/common/serialization
+36	./kafka-3.0.0-src/server-common/src/main/java/org/apache/kafka/server/common
+40	./kafka-3.0.0-src/server-common/src/main/java/org/apache/kafka/server
+76	./kafka-3.0.0-src/server-common/src/main/java/org/apache/kafka
+80	./kafka-3.0.0-src/server-common/src/main/java/org/apache
+84	./kafka-3.0.0-src/server-common/src/main/java/org
+88	./kafka-3.0.0-src/server-common/src/main/java
+92	./kafka-3.0.0-src/server-common/src/main
+132	./kafka-3.0.0-src/server-common/src
+136	./kafka-3.0.0-src/server-common
+12	./kafka-3.0.0-src/examples/bin
+48	./kafka-3.0.0-src/examples/src/main/java/kafka/examples
+52	./kafka-3.0.0-src/examples/src/main/java/kafka
+56	./kafka-3.0.0-src/examples/src/main/java
+60	./kafka-3.0.0-src/examples/src/main
+64	./kafka-3.0.0-src/examples/src
+84	./kafka-3.0.0-src/examples
+8	./kafka-3.0.0-src/connect/runtime/src/test/resources/META-INF/services
+12	./kafka-3.0.0-src/connect/runtime/src/test/resources/META-INF
+8	./kafka-3.0.0-src/connect/runtime/src/test/resources/test-plugins/sampling-converter/test/plugins
+12	./kafka-3.0.0-src/connect/runtime/src/test/resources/test-plugins/sampling-converter/test
+16	./kafka-3.0.0-src/connect/runtime/src/test/resources/test-plugins/sampling-converter
+8	./kafka-3.0.0-src/connect/runtime/src/test/resources/test-plugins/sampling-config-provider/test/plugins
+12	./kafka-3.0.0-src/connect/runtime/src/test/resources/test-plugins/sampling-config-provider/test
+8	./kafka-3.0.0-src/connect/runtime/src/test/resources/test-plugins/sampling-config-provider/META-INF/services
+12	./kafka-3.0.0-src/connect/runtime/src/test/resources/test-plugins/sampling-config-provider/META-INF
+28	./kafka-3.0.0-src/connect/runtime/src/test/resources/test-plugins/sampling-config-provider
+8	./kafka-3.0.0-src/connect/runtime/src/test/resources/test-plugins/always-throw-exception/test/plugins
+12	./kafka-3.0.0-src/connect/runtime/src/test/resources/test-plugins/always-throw-exception/test
+16	./kafka-3.0.0-src/connect/runtime/src/test/resources/test-plugins/always-throw-exception
+8	./kafka-3.0.0-src/connect/runtime/src/test/resources/test-plugins/sampling-configurable/test/plugins
+12	./kafka-3.0.0-src/connect/runtime/src/test/resources/test-plugins/sampling-configurable/test
+16	./kafka-3.0.0-src/connect/runtime/src/test/resources/test-plugins/sampling-configurable
+16	./kafka-3.0.0-src/connect/runtime/src/test/resources/test-plugins/service-loader/test/plugins
+20	./kafka-3.0.0-src/connect/runtime/src/test/resources/test-plugins/service-loader/test
+8	./kafka-3.0.0-src/connect/runtime/src/test/resources/test-plugins/service-loader/META-INF/services
+12	./kafka-3.0.0-src/connect/runtime/src/test/resources/test-plugins/service-loader/META-INF
+36	./kafka-3.0.0-src/connect/runtime/src/test/resources/test-plugins/service-loader
+8	./kafka-3.0.0-src/connect/runtime/src/test/resources/test-plugins/sampling-header-converter/test/plugins
+12	./kafka-3.0.0-src/connect/runtime/src/test/resources/test-plugins/sampling-header-converter/test
+16	./kafka-3.0.0-src/connect/runtime/src/test/resources/test-plugins/sampling-header-converter
+8	./kafka-3.0.0-src/connect/runtime/src/test/resources/test-plugins/aliased-static-field/test/plugins
+12	./kafka-3.0.0-src/connect/runtime/src/test/resources/test-plugins/aliased-static-field/test
+16	./kafka-3.0.0-src/connect/runtime/src/test/resources/test-plugins/aliased-static-field
+148	./kafka-3.0.0-src/connect/runtime/src/test/resources/test-plugins
+168	./kafka-3.0.0-src/connect/runtime/src/test/resources
+152	./kafka-3.0.0-src/connect/runtime/src/test/java/org/apache/kafka/connect/storage
+112	./kafka-3.0.0-src/connect/runtime/src/test/java/org/apache/kafka/connect/runtime/isolation
+60	./kafka-3.0.0-src/connect/runtime/src/test/java/org/apache/kafka/connect/runtime/standalone
+12	./kafka-3.0.0-src/connect/runtime/src/test/java/org/apache/kafka/connect/runtime/health
+308	./kafka-3.0.0-src/connect/runtime/src/test/java/org/apache/kafka/connect/runtime/distributed
+52	./kafka-3.0.0-src/connect/runtime/src/test/java/org/apache/kafka/connect/runtime/errors
+96	./kafka-3.0.0-src/connect/runtime/src/test/java/org/apache/kafka/connect/runtime/rest/resources
+16	./kafka-3.0.0-src/connect/runtime/src/test/java/org/apache/kafka/connect/runtime/rest/util
+8	./kafka-3.0.0-src/connect/runtime/src/test/java/org/apache/kafka/connect/runtime/rest/entities
+156	./kafka-3.0.0-src/connect/runtime/src/test/java/org/apache/kafka/connect/runtime/rest
+1216	./kafka-3.0.0-src/connect/runtime/src/test/java/org/apache/kafka/connect/runtime
+16	./kafka-3.0.0-src/connect/runtime/src/test/java/org/apache/kafka/connect/connector/policy
+20	./kafka-3.0.0-src/connect/runtime/src/test/java/org/apache/kafka/connect/connector
+100	./kafka-3.0.0-src/connect/runtime/src/test/java/org/apache/kafka/connect/util/clusters
+284	./kafka-3.0.0-src/connect/runtime/src/test/java/org/apache/kafka/connect/util
+308	./kafka-3.0.0-src/connect/runtime/src/test/java/org/apache/kafka/connect/integration
+32	./kafka-3.0.0-src/connect/runtime/src/test/java/org/apache/kafka/connect/converters
+2016	./kafka-3.0.0-src/connect/runtime/src/test/java/org/apache/kafka/connect
+2020	./kafka-3.0.0-src/connect/runtime/src/test/java/org/apache/kafka
+2024	./kafka-3.0.0-src/connect/runtime/src/test/java/org/apache
+2028	./kafka-3.0.0-src/connect/runtime/src/test/java/org
+2032	./kafka-3.0.0-src/connect/runtime/src/test/java
+2204	./kafka-3.0.0-src/connect/runtime/src/test
+8	./kafka-3.0.0-src/connect/runtime/src/main/resources/META-INF/services
+12	./kafka-3.0.0-src/connect/runtime/src/main/resources/META-INF
+16	./kafka-3.0.0-src/connect/runtime/src/main/resources
+176	./kafka-3.0.0-src/connect/runtime/src/main/java/org/apache/kafka/connect/storage
+92	./kafka-3.0.0-src/connect/runtime/src/main/java/org/apache/kafka/connect/runtime/isolation
+32	./kafka-3.0.0-src/connect/runtime/src/main/java/org/apache/kafka/connect/runtime/standalone
+16	./kafka-3.0.0-src/connect/runtime/src/main/java/org/apache/kafka/connect/runtime/health
+324	./kafka-3.0.0-src/connect/runtime/src/main/java/org/apache/kafka/connect/runtime/distributed
+72	./kafka-3.0.0-src/connect/runtime/src/main/java/org/apache/kafka/connect/runtime/errors
+48	./kafka-3.0.0-src/connect/runtime/src/main/java/org/apache/kafka/connect/runtime/rest/resources
+12	./kafka-3.0.0-src/connect/runtime/src/main/java/org/apache/kafka/connect/runtime/rest/util
+64	./kafka-3.0.0-src/connect/runtime/src/main/java/org/apache/kafka/connect/runtime/rest/entities
+16	./kafka-3.0.0-src/connect/runtime/src/main/java/org/apache/kafka/connect/runtime/rest/errors
+196	./kafka-3.0.0-src/connect/runtime/src/main/java/org/apache/kafka/connect/runtime/rest
+1220	./kafka-3.0.0-src/connect/runtime/src/main/java/org/apache/kafka/connect/runtime
+20	./kafka-3.0.0-src/connect/runtime/src/main/java/org/apache/kafka/connect/connector/policy
+24	./kafka-3.0.0-src/connect/runtime/src/main/java/org/apache/kafka/connect/connector
+20	./kafka-3.0.0-src/connect/runtime/src/main/java/org/apache/kafka/connect/cli
+144	./kafka-3.0.0-src/connect/runtime/src/main/java/org/apache/kafka/connect/util
+76	./kafka-3.0.0-src/connect/runtime/src/main/java/org/apache/kafka/connect/tools
+40	./kafka-3.0.0-src/connect/runtime/src/main/java/org/apache/kafka/connect/converters
+1704	./kafka-3.0.0-src/connect/runtime/src/main/java/org/apache/kafka/connect
+1708	./kafka-3.0.0-src/connect/runtime/src/main/java/org/apache/kafka
+1712	./kafka-3.0.0-src/connect/runtime/src/main/java/org/apache
+1716	./kafka-3.0.0-src/connect/runtime/src/main/java/org
+1720	./kafka-3.0.0-src/connect/runtime/src/main/java
+1740	./kafka-3.0.0-src/connect/runtime/src/main
+3948	./kafka-3.0.0-src/connect/runtime/src
+3952	./kafka-3.0.0-src/connect/runtime
+8	./kafka-3.0.0-src/connect/json/src/test/resources
+60	./kafka-3.0.0-src/connect/json/src/test/java/org/apache/kafka/connect/json
+64	./kafka-3.0.0-src/connect/json/src/test/java/org/apache/kafka/connect
+68	./kafka-3.0.0-src/connect/json/src/test/java/org/apache/kafka
+72	./kafka-3.0.0-src/connect/json/src/test/java/org/apache
+76	./kafka-3.0.0-src/connect/json/src/test/java/org
+80	./kafka-3.0.0-src/connect/json/src/test/java
+92	./kafka-3.0.0-src/connect/json/src/test
+68	./kafka-3.0.0-src/connect/json/src/main/java/org/apache/kafka/connect/json
+72	./kafka-3.0.0-src/connect/json/src/main/java/org/apache/kafka/connect
+76	./kafka-3.0.0-src/connect/json/src/main/java/org/apache/kafka
+80	./kafka-3.0.0-src/connect/json/src/main/java/org/apache
+84	./kafka-3.0.0-src/connect/json/src/main/java/org
+88	./kafka-3.0.0-src/connect/json/src/main/java
+92	./kafka-3.0.0-src/connect/json/src/main
+188	./kafka-3.0.0-src/connect/json/src
+196	./kafka-3.0.0-src/connect/json
+8	./kafka-3.0.0-src/connect/transforms/src/test/java/org/apache/kafka/connect/transforms/util
+16	./kafka-3.0.0-src/connect/transforms/src/test/java/org/apache/kafka/connect/transforms/predicates
+204	./kafka-3.0.0-src/connect/transforms/src/test/java/org/apache/kafka/connect/transforms
+208	./kafka-3.0.0-src/connect/transforms/src/test/java/org/apache/kafka/connect
+212	./kafka-3.0.0-src/connect/transforms/src/test/java/org/apache/kafka
+216	./kafka-3.0.0-src/connect/transforms/src/test/java/org/apache
+220	./kafka-3.0.0-src/connect/transforms/src/test/java/org
+224	./kafka-3.0.0-src/connect/transforms/src/test/java
+228	./kafka-3.0.0-src/connect/transforms/src/test
+24	./kafka-3.0.0-src/connect/transforms/src/main/java/org/apache/kafka/connect/transforms/util
+16	./kafka-3.0.0-src/connect/transforms/src/main/java/org/apache/kafka/connect/transforms/predicates
+204	./kafka-3.0.0-src/connect/transforms/src/main/java/org/apache/kafka/connect/transforms
+208	./kafka-3.0.0-src/connect/transforms/src/main/java/org/apache/kafka/connect
+212	./kafka-3.0.0-src/connect/transforms/src/main/java/org/apache/kafka
+216	./kafka-3.0.0-src/connect/transforms/src/main/java/org/apache
+220	./kafka-3.0.0-src/connect/transforms/src/main/java/org
+224	./kafka-3.0.0-src/connect/transforms/src/main/java
+228	./kafka-3.0.0-src/connect/transforms/src/main
+460	./kafka-3.0.0-src/connect/transforms/src
+464	./kafka-3.0.0-src/connect/transforms
+24	./kafka-3.0.0-src/connect/api/src/test/java/org/apache/kafka/connect/storage
+12	./kafka-3.0.0-src/connect/api/src/test/java/org/apache/kafka/connect/connector
+20	./kafka-3.0.0-src/connect/api/src/test/java/org/apache/kafka/connect/sink
+148	./kafka-3.0.0-src/connect/api/src/test/java/org/apache/kafka/connect/data
+8	./kafka-3.0.0-src/connect/api/src/test/java/org/apache/kafka/connect/util
+32	./kafka-3.0.0-src/connect/api/src/test/java/org/apache/kafka/connect/header
+20	./kafka-3.0.0-src/connect/api/src/test/java/org/apache/kafka/connect/source
+268	./kafka-3.0.0-src/connect/api/src/test/java/org/apache/kafka/connect
+272	./kafka-3.0.0-src/connect/api/src/test/java/org/apache/kafka
+276	./kafka-3.0.0-src/connect/api/src/test/java/org/apache
+280	./kafka-3.0.0-src/connect/api/src/test/java/org
+284	./kafka-3.0.0-src/connect/api/src/test/java
+288	./kafka-3.0.0-src/connect/api/src/test
+40	./kafka-3.0.0-src/connect/api/src/main/java/org/apache/kafka/connect/storage
+12	./kafka-3.0.0-src/connect/api/src/main/java/org/apache/kafka/connect/connector/policy
+40	./kafka-3.0.0-src/connect/api/src/main/java/org/apache/kafka/connect/connector
+8	./kafka-3.0.0-src/connect/api/src/main/java/org/apache/kafka/connect/transforms/predicates
+16	./kafka-3.0.0-src/connect/api/src/main/java/org/apache/kafka/connect/transforms
+8	./kafka-3.0.0-src/connect/api/src/main/java/org/apache/kafka/connect/components
+44	./kafka-3.0.0-src/connect/api/src/main/java/org/apache/kafka/connect/sink
+148	./kafka-3.0.0-src/connect/api/src/main/java/org/apache/kafka/connect/data
+8	./kafka-3.0.0-src/connect/api/src/main/java/org/apache/kafka/connect/util
+32	./kafka-3.0.0-src/connect/api/src/main/java/org/apache/kafka/connect/health
+40	./kafka-3.0.0-src/connect/api/src/main/java/org/apache/kafka/connect/header
+36	./kafka-3.0.0-src/connect/api/src/main/java/org/apache/kafka/connect/errors
+32	./kafka-3.0.0-src/connect/api/src/main/java/org/apache/kafka/connect/source
+12	./kafka-3.0.0-src/connect/api/src/main/java/org/apache/kafka/connect/rest
+460	./kafka-3.0.0-src/connect/api/src/main/java/org/apache/kafka/connect
+464	./kafka-3.0.0-src/connect/api/src/main/java/org/apache/kafka
+468	./kafka-3.0.0-src/connect/api/src/main/java/org/apache
+472	./kafka-3.0.0-src/connect/api/src/main/java/org
+476	./kafka-3.0.0-src/connect/api/src/main/java
+480	./kafka-3.0.0-src/connect/api/src/main
+772	./kafka-3.0.0-src/connect/api/src
+780	./kafka-3.0.0-src/connect/api
+8	./kafka-3.0.0-src/connect/mirror/src/test/resources
+68	./kafka-3.0.0-src/connect/mirror/src/test/java/org/apache/kafka/connect/mirror/integration
+184	./kafka-3.0.0-src/connect/mirror/src/test/java/org/apache/kafka/connect/mirror
+188	./kafka-3.0.0-src/connect/mirror/src/test/java/org/apache/kafka/connect
+192	./kafka-3.0.0-src/connect/mirror/src/test/java/org/apache/kafka
+196	./kafka-3.0.0-src/connect/mirror/src/test/java/org/apache
+200	./kafka-3.0.0-src/connect/mirror/src/test/java/org
+204	./kafka-3.0.0-src/connect/mirror/src/test/java
+216	./kafka-3.0.0-src/connect/mirror/src/test
+16	./kafka-3.0.0-src/connect/mirror/src/main/java/org/apache/kafka/connect/mirror/formatters
+228	./kafka-3.0.0-src/connect/mirror/src/main/java/org/apache/kafka/connect/mirror
+232	./kafka-3.0.0-src/connect/mirror/src/main/java/org/apache/kafka/connect
+236	./kafka-3.0.0-src/connect/mirror/src/main/java/org/apache/kafka
+240	./kafka-3.0.0-src/connect/mirror/src/main/java/org/apache
+244	./kafka-3.0.0-src/connect/mirror/src/main/java/org
+248	./kafka-3.0.0-src/connect/mirror/src/main/java
+252	./kafka-3.0.0-src/connect/mirror/src/main
+472	./kafka-3.0.0-src/connect/mirror/src
+488	./kafka-3.0.0-src/connect/mirror
+36	./kafka-3.0.0-src/connect/file/src/test/java/org/apache/kafka/connect/file
+40	./kafka-3.0.0-src/connect/file/src/test/java/org/apache/kafka/connect
+44	./kafka-3.0.0-src/connect/file/src/test/java/org/apache/kafka
+48	./kafka-3.0.0-src/connect/file/src/test/java/org/apache
+52	./kafka-3.0.0-src/connect/file/src/test/java/org
+56	./kafka-3.0.0-src/connect/file/src/test/java
+60	./kafka-3.0.0-src/connect/file/src/test
+28	./kafka-3.0.0-src/connect/file/src/main/java/org/apache/kafka/connect/file
+32	./kafka-3.0.0-src/connect/file/src/main/java/org/apache/kafka/connect
+36	./kafka-3.0.0-src/connect/file/src/main/java/org/apache/kafka
+40	./kafka-3.0.0-src/connect/file/src/main/java/org/apache
+44	./kafka-3.0.0-src/connect/file/src/main/java/org
+48	./kafka-3.0.0-src/connect/file/src/main/java
+52	./kafka-3.0.0-src/connect/file/src/main
+116	./kafka-3.0.0-src/connect/file/src
+120	./kafka-3.0.0-src/connect/file
+24	./kafka-3.0.0-src/connect/basic-auth-extension/src/test/java/org/apache/kafka/connect/rest/basic/auth/extension
+28	./kafka-3.0.0-src/connect/basic-auth-extension/src/test/java/org/apache/kafka/connect/rest/basic/auth
+32	./kafka-3.0.0-src/connect/basic-auth-extension/src/test/java/org/apache/kafka/connect/rest/basic
+36	./kafka-3.0.0-src/connect/basic-auth-extension/src/test/java/org/apache/kafka/connect/rest
+40	./kafka-3.0.0-src/connect/basic-auth-extension/src/test/java/org/apache/kafka/connect
+44	./kafka-3.0.0-src/connect/basic-auth-extension/src/test/java/org/apache/kafka
+48	./kafka-3.0.0-src/connect/basic-auth-extension/src/test/java/org/apache
+52	./kafka-3.0.0-src/connect/basic-auth-extension/src/test/java/org
+56	./kafka-3.0.0-src/connect/basic-auth-extension/src/test/java
+60	./kafka-3.0.0-src/connect/basic-auth-extension/src/test
+8	./kafka-3.0.0-src/connect/basic-auth-extension/src/main/resources/META-INF/services
+12	./kafka-3.0.0-src/connect/basic-auth-extension/src/main/resources/META-INF
+16	./kafka-3.0.0-src/connect/basic-auth-extension/src/main/resources
+28	./kafka-3.0.0-src/connect/basic-auth-extension/src/main/java/org/apache/kafka/connect/rest/basic/auth/extension
+32	./kafka-3.0.0-src/connect/basic-auth-extension/src/main/java/org/apache/kafka/connect/rest/basic/auth
+36	./kafka-3.0.0-src/connect/basic-auth-extension/src/main/java/org/apache/kafka/connect/rest/basic
+40	./kafka-3.0.0-src/connect/basic-auth-extension/src/main/java/org/apache/kafka/connect/rest
+44	./kafka-3.0.0-src/connect/basic-auth-extension/src/main/java/org/apache/kafka/connect
+48	./kafka-3.0.0-src/connect/basic-auth-extension/src/main/java/org/apache/kafka
+52	./kafka-3.0.0-src/connect/basic-auth-extension/src/main/java/org/apache
+56	./kafka-3.0.0-src/connect/basic-auth-extension/src/main/java/org
+60	./kafka-3.0.0-src/connect/basic-auth-extension/src/main/java
+80	./kafka-3.0.0-src/connect/basic-auth-extension/src/main
+144	./kafka-3.0.0-src/connect/basic-auth-extension/src
+148	./kafka-3.0.0-src/connect/basic-auth-extension
+16	./kafka-3.0.0-src/connect/mirror-client/src/test/java/org/apache/kafka/connect/mirror
+20	./kafka-3.0.0-src/connect/mirror-client/src/test/java/org/apache/kafka/connect
+24	./kafka-3.0.0-src/connect/mirror-client/src/test/java/org/apache/kafka
+28	./kafka-3.0.0-src/connect/mirror-client/src/test/java/org/apache
+32	./kafka-3.0.0-src/connect/mirror-client/src/test/java/org
+36	./kafka-3.0.0-src/connect/mirror-client/src/test/java
+40	./kafka-3.0.0-src/connect/mirror-client/src/test
+60	./kafka-3.0.0-src/connect/mirror-client/src/main/java/org/apache/kafka/connect/mirror
+64	./kafka-3.0.0-src/connect/mirror-client/src/main/java/org/apache/kafka/connect
+68	./kafka-3.0.0-src/connect/mirror-client/src/main/java/org/apache/kafka
+72	./kafka-3.0.0-src/connect/mirror-client/src/main/java/org/apache
+76	./kafka-3.0.0-src/connect/mirror-client/src/main/java/org
+80	./kafka-3.0.0-src/connect/mirror-client/src/main/java
+84	./kafka-3.0.0-src/connect/mirror-client/src/main
+128	./kafka-3.0.0-src/connect/mirror-client/src
+132	./kafka-3.0.0-src/connect/mirror-client
+6284	./kafka-3.0.0-src/connect
+8	./kafka-3.0.0-src/trogdor/src/test/resources
+20	./kafka-3.0.0-src/trogdor/src/test/java/org/apache/kafka/trogdor/task
+44	./kafka-3.0.0-src/trogdor/src/test/java/org/apache/kafka/trogdor/workload
+8	./kafka-3.0.0-src/trogdor/src/test/java/org/apache/kafka/trogdor/basic
+64	./kafka-3.0.0-src/trogdor/src/test/java/org/apache/kafka/trogdor/common
+28	./kafka-3.0.0-src/trogdor/src/test/java/org/apache/kafka/trogdor/agent
+40	./kafka-3.0.0-src/trogdor/src/test/java/org/apache/kafka/trogdor/coordinator
+12	./kafka-3.0.0-src/trogdor/src/test/java/org/apache/kafka/trogdor/rest
+220	./kafka-3.0.0-src/trogdor/src/test/java/org/apache/kafka/trogdor
+224	./kafka-3.0.0-src/trogdor/src/test/java/org/apache/kafka
+228	./kafka-3.0.0-src/trogdor/src/test/java/org/apache
+232	./kafka-3.0.0-src/trogdor/src/test/java/org
+236	./kafka-3.0.0-src/trogdor/src/test/java
+248	./kafka-3.0.0-src/trogdor/src/test
+36	./kafka-3.0.0-src/trogdor/src/main/java/org/apache/kafka/trogdor/task
+332	./kafka-3.0.0-src/trogdor/src/main/java/org/apache/kafka/trogdor/workload
+16	./kafka-3.0.0-src/trogdor/src/main/java/org/apache/kafka/trogdor/basic
+48	./kafka-3.0.0-src/trogdor/src/main/java/org/apache/kafka/trogdor/common
+60	./kafka-3.0.0-src/trogdor/src/main/java/org/apache/kafka/trogdor/fault
+64	./kafka-3.0.0-src/trogdor/src/main/java/org/apache/kafka/trogdor/agent
+88	./kafka-3.0.0-src/trogdor/src/main/java/org/apache/kafka/trogdor/coordinator
+144	./kafka-3.0.0-src/trogdor/src/main/java/org/apache/kafka/trogdor/rest
+792	./kafka-3.0.0-src/trogdor/src/main/java/org/apache/kafka/trogdor
+796	./kafka-3.0.0-src/trogdor/src/main/java/org/apache/kafka
+800	./kafka-3.0.0-src/trogdor/src/main/java/org/apache
+804	./kafka-3.0.0-src/trogdor/src/main/java/org
+808	./kafka-3.0.0-src/trogdor/src/main/java
+812	./kafka-3.0.0-src/trogdor/src/main
+1064	./kafka-3.0.0-src/trogdor/src
+1068	./kafka-3.0.0-src/trogdor
+68	./kafka-3.0.0-src/checkstyle
+92	./kafka-3.0.0-src/licenses
+16	./kafka-3.0.0-src/vagrant/aws
+64	./kafka-3.0.0-src/vagrant
+8	./kafka-3.0.0-src/metadata/src/test/resources
+52	./kafka-3.0.0-src/metadata/src/test/java/org/apache/kafka/timeline
+60	./kafka-3.0.0-src/metadata/src/test/java/org/apache/kafka/metalog
+56	./kafka-3.0.0-src/metadata/src/test/java/org/apache/kafka/image
+276	./kafka-3.0.0-src/metadata/src/test/java/org/apache/kafka/controller
+60	./kafka-3.0.0-src/metadata/src/test/java/org/apache/kafka/metadata
+508	./kafka-3.0.0-src/metadata/src/test/java/org/apache/kafka
+512	./kafka-3.0.0-src/metadata/src/test/java/org/apache
+516	./kafka-3.0.0-src/metadata/src/test/java/org
+520	./kafka-3.0.0-src/metadata/src/test/java
+532	./kafka-3.0.0-src/metadata/src/test
+72	./kafka-3.0.0-src/metadata/src/main/resources/common/metadata
+76	./kafka-3.0.0-src/metadata/src/main/resources/common
+80	./kafka-3.0.0-src/metadata/src/main/resources
+88	./kafka-3.0.0-src/metadata/src/main/java/org/apache/kafka/timeline
+112	./kafka-3.0.0-src/metadata/src/main/java/org/apache/kafka/image
+348	./kafka-3.0.0-src/metadata/src/main/java/org/apache/kafka/controller
+76	./kafka-3.0.0-src/metadata/src/main/java/org/apache/kafka/metadata
+628	./kafka-3.0.0-src/metadata/src/main/java/org/apache/kafka
+632	./kafka-3.0.0-src/metadata/src/main/java/org/apache
+636	./kafka-3.0.0-src/metadata/src/main/java/org
+640	./kafka-3.0.0-src/metadata/src/main/java
+724	./kafka-3.0.0-src/metadata/src/main
+1260	./kafka-3.0.0-src/metadata/src
+1264	./kafka-3.0.0-src/metadata
+36	./kafka-3.0.0-src/shell/src/test/java/org/apache/kafka/shell
+40	./kafka-3.0.0-src/shell/src/test/java/org/apache/kafka
+44	./kafka-3.0.0-src/shell/src/test/java/org/apache
+48	./kafka-3.0.0-src/shell/src/test/java/org
+52	./kafka-3.0.0-src/shell/src/test/java
+56	./kafka-3.0.0-src/shell/src/test
+144	./kafka-3.0.0-src/shell/src/main/java/org/apache/kafka/shell
+148	./kafka-3.0.0-src/shell/src/main/java/org/apache/kafka
+152	./kafka-3.0.0-src/shell/src/main/java/org/apache
+156	./kafka-3.0.0-src/shell/src/main/java/org
+160	./kafka-3.0.0-src/shell/src/main/java
+164	./kafka-3.0.0-src/shell/src/main
+224	./kafka-3.0.0-src/shell/src
+228	./kafka-3.0.0-src/shell
+16	./kafka-3.0.0-src/core/src/test/resources
+56	./kafka-3.0.0-src/core/src/test/java/kafka/test/junit
+32	./kafka-3.0.0-src/core/src/test/java/kafka/test/annotation
+132	./kafka-3.0.0-src/core/src/test/java/kafka/test
+48	./kafka-3.0.0-src/core/src/test/java/kafka/testkit
+184	./kafka-3.0.0-src/core/src/test/java/kafka
+188	./kafka-3.0.0-src/core/src/test/java
+56	./kafka-3.0.0-src/core/src/test/scala/other/kafka
+64	./kafka-3.0.0-src/core/src/test/scala/other
+12	./kafka-3.0.0-src/core/src/test/scala/unit/kafka/utils/json
+16	./kafka-3.0.0-src/core/src/test/scala/unit/kafka/utils/timer
+220	./kafka-3.0.0-src/core/src/test/scala/unit/kafka/utils
+388	./kafka-3.0.0-src/core/src/test/scala/unit/kafka/admin
+40	./kafka-3.0.0-src/core/src/test/scala/unit/kafka/zookeeper
+20	./kafka-3.0.0-src/core/src/test/scala/unit/kafka/metrics
+100	./kafka-3.0.0-src/core/src/test/scala/unit/kafka/zk
+12	./kafka-3.0.0-src/core/src/test/scala/unit/kafka/common
+20	./kafka-3.0.0-src/core/src/test/scala/unit/kafka/api
+92	./kafka-3.0.0-src/core/src/test/scala/unit/kafka/security/authorizer
+20	./kafka-3.0.0-src/core/src/test/scala/unit/kafka/security/auth
+24	./kafka-3.0.0-src/core/src/test/scala/unit/kafka/security/token/delegation
+28	./kafka-3.0.0-src/core/src/test/scala/unit/kafka/security/token
+144	./kafka-3.0.0-src/core/src/test/scala/unit/kafka/security
+12	./kafka-3.0.0-src/core/src/test/scala/unit/kafka/server/epoch/util
+84	./kafka-3.0.0-src/core/src/test/scala/unit/kafka/server/epoch
+16	./kafka-3.0.0-src/core/src/test/scala/unit/kafka/server/checkpoints
+40	./kafka-3.0.0-src/core/src/test/scala/unit/kafka/server/metadata
+1668	./kafka-3.0.0-src/core/src/test/scala/unit/kafka/server
+224	./kafka-3.0.0-src/core/src/test/scala/unit/kafka/coordinator/transaction
+360	./kafka-3.0.0-src/core/src/test/scala/unit/kafka/coordinator/group
+600	./kafka-3.0.0-src/core/src/test/scala/unit/kafka/coordinator
+232	./kafka-3.0.0-src/core/src/test/scala/unit/kafka/controller
+40	./kafka-3.0.0-src/core/src/test/scala/unit/kafka/integration
+668	./kafka-3.0.0-src/core/src/test/scala/unit/kafka/log
+180	./kafka-3.0.0-src/core/src/test/scala/unit/kafka/network
+148	./kafka-3.0.0-src/core/src/test/scala/unit/kafka/cluster
+72	./kafka-3.0.0-src/core/src/test/scala/unit/kafka/tools
+24	./kafka-3.0.0-src/core/src/test/scala/unit/kafka/raft
+4600	./kafka-3.0.0-src/core/src/test/scala/unit/kafka
+4604	./kafka-3.0.0-src/core/src/test/scala/unit
+20	./kafka-3.0.0-src/core/src/test/scala/kafka/utils
+8	./kafka-3.0.0-src/core/src/test/scala/kafka/metrics
+20	./kafka-3.0.0-src/core/src/test/scala/kafka/zk
+12	./kafka-3.0.0-src/core/src/test/scala/kafka/common
+28	./kafka-3.0.0-src/core/src/test/scala/kafka/security/minikdc
+32	./kafka-3.0.0-src/core/src/test/scala/kafka/security
+8	./kafka-3.0.0-src/core/src/test/scala/kafka/server/metadata
+40	./kafka-3.0.0-src/core/src/test/scala/kafka/server
+60	./kafka-3.0.0-src/core/src/test/scala/kafka/tools
+36	./kafka-3.0.0-src/core/src/test/scala/kafka/raft
+232	./kafka-3.0.0-src/core/src/test/scala/kafka
+40	./kafka-3.0.0-src/core/src/test/scala/integration/kafka/admin
+812	./kafka-3.0.0-src/core/src/test/scala/integration/kafka/api
+188	./kafka-3.0.0-src/core/src/test/scala/integration/kafka/server
+8	./kafka-3.0.0-src/core/src/test/scala/integration/kafka/coordinator/transaction
+12	./kafka-3.0.0-src/core/src/test/scala/integration/kafka/coordinator
+24	./kafka-3.0.0-src/core/src/test/scala/integration/kafka/network
+12	./kafka-3.0.0-src/core/src/test/scala/integration/kafka/tools
+1092	./kafka-3.0.0-src/core/src/test/scala/integration/kafka
+1096	./kafka-3.0.0-src/core/src/test/scala/integration
+6000	./kafka-3.0.0-src/core/src/test/scala
+6208	./kafka-3.0.0-src/core/src/test
+28	./kafka-3.0.0-src/core/src/main/resources/common/message
+32	./kafka-3.0.0-src/core/src/main/resources/common
+36	./kafka-3.0.0-src/core/src/main/resources
+12	./kafka-3.0.0-src/core/src/main/java/kafka/metrics
+16	./kafka-3.0.0-src/core/src/main/java/kafka
+20	./kafka-3.0.0-src/core/src/main/java
+12	./kafka-3.0.0-src/core/src/main/scala/org/apache/zookeeper
+16	./kafka-3.0.0-src/core/src/main/scala/org/apache
+20	./kafka-3.0.0-src/core/src/main/scala/org
+24	./kafka-3.0.0-src/core/src/main/scala/kafka/utils/json
+28	./kafka-3.0.0-src/core/src/main/scala/kafka/utils/timer
+180	./kafka-3.0.0-src/core/src/main/scala/kafka/utils
+364	./kafka-3.0.0-src/core/src/main/scala/kafka/admin
+8	./kafka-3.0.0-src/core/src/main/scala/kafka/consumer
+28	./kafka-3.0.0-src/core/src/main/scala/kafka/zookeeper
+8	./kafka-3.0.0-src/core/src/main/scala/kafka/serializer
+32	./kafka-3.0.0-src/core/src/main/scala/kafka/metrics
+168	./kafka-3.0.0-src/core/src/main/scala/kafka/zk
+116	./kafka-3.0.0-src/core/src/main/scala/kafka/common
+36	./kafka-3.0.0-src/core/src/main/scala/kafka/api
+8	./kafka-3.0.0-src/core/src/main/scala/kafka/message
+52	./kafka-3.0.0-src/core/src/main/scala/kafka/security/authorizer
+60	./kafka-3.0.0-src/core/src/main/scala/kafka/security
+16	./kafka-3.0.0-src/core/src/main/scala/kafka/server/epoch
+20	./kafka-3.0.0-src/core/src/main/scala/kafka/server/checkpoints
+92	./kafka-3.0.0-src/core/src/main/scala/kafka/server/metadata
+1356	./kafka-3.0.0-src/core/src/main/scala/kafka/server
+164	./kafka-3.0.0-src/core/src/main/scala/kafka/coordinator/transaction
+212	./kafka-3.0.0-src/core/src/main/scala/kafka/coordinator/group
+380	./kafka-3.0.0-src/core/src/main/scala/kafka/coordinator
+304	./kafka-3.0.0-src/core/src/main/scala/kafka/controller
+524	./kafka-3.0.0-src/core/src/main/scala/kafka/log
+128	./kafka-3.0.0-src/core/src/main/scala/kafka/network
+96	./kafka-3.0.0-src/core/src/main/scala/kafka/cluster
+272	./kafka-3.0.0-src/core/src/main/scala/kafka/tools
+56	./kafka-3.0.0-src/core/src/main/scala/kafka/raft
+4136	./kafka-3.0.0-src/core/src/main/scala/kafka
+4160	./kafka-3.0.0-src/core/src/main/scala
+4220	./kafka-3.0.0-src/core/src/main
+10432	./kafka-3.0.0-src/core/src
+10440	./kafka-3.0.0-src/core
+8	./kafka-3.0.0-src/tools/src/test/resources
+64	./kafka-3.0.0-src/tools/src/test/java/org/apache/kafka/tools
+68	./kafka-3.0.0-src/tools/src/test/java/org/apache/kafka
+72	./kafka-3.0.0-src/tools/src/test/java/org/apache
+76	./kafka-3.0.0-src/tools/src/test/java/org
+80	./kafka-3.0.0-src/tools/src/test/java
+92	./kafka-3.0.0-src/tools/src/test
+200	./kafka-3.0.0-src/tools/src/main/java/org/apache/kafka/tools
+204	./kafka-3.0.0-src/tools/src/main/java/org/apache/kafka
+208	./kafka-3.0.0-src/tools/src/main/java/org/apache
+212	./kafka-3.0.0-src/tools/src/main/java/org
+216	./kafka-3.0.0-src/tools/src/main/java
+220	./kafka-3.0.0-src/tools/src/main
+316	./kafka-3.0.0-src/tools/src
+320	./kafka-3.0.0-src/tools
+24	./kafka-3.0.0-src/jmh-benchmarks/src/main/java/org/apache/kafka/jmh/record
+16	./kafka-3.0.0-src/jmh-benchmarks/src/main/java/org/apache/kafka/jmh/acl
+8	./kafka-3.0.0-src/jmh-benchmarks/src/main/java/org/apache/kafka/jmh/consumer
+8	./kafka-3.0.0-src/jmh-benchmarks/src/main/java/org/apache/kafka/jmh/timeline
+12	./kafka-3.0.0-src/jmh-benchmarks/src/main/java/org/apache/kafka/jmh/fetchsession
+36	./kafka-3.0.0-src/jmh-benchmarks/src/main/java/org/apache/kafka/jmh/common
+8	./kafka-3.0.0-src/jmh-benchmarks/src/main/java/org/apache/kafka/jmh/cache
+24	./kafka-3.0.0-src/jmh-benchmarks/src/main/java/org/apache/kafka/jmh/server
+20	./kafka-3.0.0-src/jmh-benchmarks/src/main/java/org/apache/kafka/jmh/partition
+20	./kafka-3.0.0-src/jmh-benchmarks/src/main/java/org/apache/kafka/jmh/fetcher
+16	./kafka-3.0.0-src/jmh-benchmarks/src/main/java/org/apache/kafka/jmh/metadata
+16	./kafka-3.0.0-src/jmh-benchmarks/src/main/java/org/apache/kafka/jmh/producer
+212	./kafka-3.0.0-src/jmh-benchmarks/src/main/java/org/apache/kafka/jmh
+216	./kafka-3.0.0-src/jmh-benchmarks/src/main/java/org/apache/kafka
+220	./kafka-3.0.0-src/jmh-benchmarks/src/main/java/org/apache
+224	./kafka-3.0.0-src/jmh-benchmarks/src/main/java/org
+228	./kafka-3.0.0-src/jmh-benchmarks/src/main/java
+232	./kafka-3.0.0-src/jmh-benchmarks/src/main
+236	./kafka-3.0.0-src/jmh-benchmarks/src
+252	./kafka-3.0.0-src/jmh-benchmarks
+12	./kafka-3.0.0-src/raft/config
+8	./kafka-3.0.0-src/raft/bin
+8	./kafka-3.0.0-src/raft/src/test/resources
+48	./kafka-3.0.0-src/raft/src/test/java/org/apache/kafka/snapshot
+88	./kafka-3.0.0-src/raft/src/test/java/org/apache/kafka/raft/internals
+560	./kafka-3.0.0-src/raft/src/test/java/org/apache/kafka/raft
+612	./kafka-3.0.0-src/raft/src/test/java/org/apache/kafka
+616	./kafka-3.0.0-src/raft/src/test/java/org/apache
+620	./kafka-3.0.0-src/raft/src/test/java/org
+624	./kafka-3.0.0-src/raft/src/test/java
+636	./kafka-3.0.0-src/raft/src/test
+8	./kafka-3.0.0-src/raft/src/main/resources/common/message
+12	./kafka-3.0.0-src/raft/src/main/resources/common
+16	./kafka-3.0.0-src/raft/src/main/resources
+56	./kafka-3.0.0-src/raft/src/main/java/org/apache/kafka/snapshot
+100	./kafka-3.0.0-src/raft/src/main/java/org/apache/kafka/raft/internals
+16	./kafka-3.0.0-src/raft/src/main/java/org/apache/kafka/raft/errors
+456	./kafka-3.0.0-src/raft/src/main/java/org/apache/kafka/raft
+516	./kafka-3.0.0-src/raft/src/main/java/org/apache/kafka
+520	./kafka-3.0.0-src/raft/src/main/java/org/apache
+524	./kafka-3.0.0-src/raft/src/main/java/org
+528	./kafka-3.0.0-src/raft/src/main/java
+548	./kafka-3.0.0-src/raft/src/main
+1188	./kafka-3.0.0-src/raft/src
+1216	./kafka-3.0.0-src/raft
+12	./kafka-3.0.0-src/gradle/resources
+8	./kafka-3.0.0-src/gradle/wrapper
+60	./kafka-3.0.0-src/gradle
+57556	./kafka-3.0.0-src
+16	./.minikube/machines/minikube
+28	./.minikube/machines
+4	./.minikube/config
+4	./.minikube/addons
+523980	./.minikube/cache/preloaded-tarball
+363936	./.minikube/cache/kic
+45812	./.minikube/cache/linux/v1.22.2
+45816	./.minikube/cache/linux
+933736	./.minikube/cache
+44	./.minikube/profiles/minikube
+48	./.minikube/profiles
+104	./.minikube/logs
+4	./.minikube/files
+20	./.minikube/certs
+933984	./.minikube
+20	./geekbrains/practice/2.docker/golang
+16	./geekbrains/practice/2.docker/python-django/myapp
+28	./geekbrains/practice/2.docker/python-django
+16	./geekbrains/practice/2.docker/docker-compose/myapp
+4	./geekbrains/practice/2.docker/docker-compose/polls/migrations
+32	./geekbrains/practice/2.docker/docker-compose/polls
+80	./geekbrains/practice/2.docker/docker-compose
+132	./geekbrains/practice/2.docker
+16	./geekbrains/practice/3.kubernetes-intro
+20	./geekbrains/practice/5.kubernetes-network
+16	./geekbrains/practice/4.resources-and-persistence/persistence
+40	./geekbrains/practice/4.resources-and-persistence
+32	./geekbrains/practice/7.advanced-abstractions/rabbitmq-statefulset
+52	./geekbrains/practice/7.advanced-abstractions
+16	./geekbrains/practice/8.ci-cd/gitlab-runner
+16	./geekbrains/practice/8.ci-cd/app/kube/postgres
+32	./geekbrains/practice/8.ci-cd/app/kube
+8	./geekbrains/practice/8.ci-cd/app/config
+8	./geekbrains/practice/8.ci-cd/app/model
+12	./geekbrains/practice/8.ci-cd/app/handler
+8	./geekbrains/practice/8.ci-cd/app/app
+96	./geekbrains/practice/8.ci-cd/app
+124	./geekbrains/practice/8.ci-cd
+388	./geekbrains/practice
+4	./geekbrains/.git/refs/tags
+8	./geekbrains/.git/refs/heads
+16	./geekbrains/.git/refs
+56	./geekbrains/.git/hooks
+404	./geekbrains/.git/objects/pack
+8	./geekbrains/.git/objects/a5
+8	./geekbrains/.git/objects/41
+8	./geekbrains/.git/objects/de
+8	./geekbrains/.git/objects/0d
+8	./geekbrains/.git/objects/6b
+8	./geekbrains/.git/objects/84
+8	./geekbrains/.git/objects/86
+8	./geekbrains/.git/objects/9d
+8	./geekbrains/.git/objects/1c
+8	./geekbrains/.git/objects/2c
+12	./geekbrains/.git/objects/da
+4	./geekbrains/.git/objects/info
+8	./geekbrains/.git/objects/c4
+8	./geekbrains/.git/objects/ec
+8	./geekbrains/.git/objects/39
+528	./geekbrains/.git/objects
+8	./geekbrains/.git/info
+4	./geekbrains/.git/branches
+8	./geekbrains/.git/logs/refs/heads
+12	./geekbrains/.git/logs/refs
+20	./geekbrains/.git/logs
+668	./geekbrains/.git
+16	./geekbrains/homework/2.docker/golang
+12	./geekbrains/homework/2.docker/python
+36	./geekbrains/homework/2.docker
+8	./geekbrains/homework/3.kubernetes-intro
+8	./geekbrains/homework/5.kubernetes-network
+8	./geekbrains/homework/4.resources-and-persistence
+8	./geekbrains/homework/7.advanced-abstractions
+8	./geekbrains/homework/8.ci-cd
+80	./geekbrains/homework
+1652	./geekbrains
+16	./app/kube/postgres
+32	./app/kube
+8	./app/config
+8	./app/model
+12	./app/handler
+8	./app/app
+108	./app
+1154508	.
+igor@ubuntu-server:~$ 
+igor@ubuntu-server:~$ df
+Filesystem                        1K-blocks     Used Available Use% Mounted on
+udev                                1967956        0   1967956   0% /dev
+tmpfs                                402588     1196    401392   1% /run
+/dev/mapper/ubuntu--vg-ubuntu--lv  25155844 17972052   5882904  76% /
+tmpfs                               2012940        0   2012940   0% /dev/shm
+tmpfs                                  5120        0      5120   0% /run/lock
+tmpfs                               2012940        0   2012940   0% /sys/fs/cgroup
+/dev/loop2                            63488    63488         0 100% /snap/core20/1361
+/dev/loop1                            56960    56960         0 100% /snap/core18/2344
+/dev/loop3                            63488    63488         0 100% /snap/core20/1376
+/dev/sda2                            999320   211100    719408  23% /boot
+/dev/loop4                            69632    69632         0 100% /snap/lxd/22526
+/dev/loop0                            56960    56960         0 100% /snap/core18/2284
+/dev/loop6                            44672    44672         0 100% /snap/snapd/14978
+/dev/loop5                            69504    69504         0 100% /snap/lxd/22753
+/dev/loop7                            44800    44800         0 100% /snap/snapd/15177
+tmpfs                                402588        0    402588   0% /run/user/1000
+igor@ubuntu-server:~$ mkdir /pv_1
+mkdir: cannot create directory ‘/pv_1’: File exists
+igor@ubuntu-server:~$ sudo mkdir /pv_1
+[sudo] password for igor: 
+mkdir: cannot create directory ‘/pv_1’: File exists
+igor@ubuntu-server:~$ sudo su  mkdir /pv_1
+su: user mkdir does not exist
+igor@ubuntu-server:~$ vi pv2.yaml
+igor@ubuntu-server:~$ kubectl create -f pv2.yaml
+error: unable to recognize "pv2.yaml": no matches for kind "PersistenVolume" in version "v1"
+igor@ubuntu-server:~$ vi pv2.yaml
+igor@ubuntu-server:~$ kubectl create -f pv2.yaml
+error: unable to recognize "pv2.yaml": no matches for kind "PersistenVolume" in version "v1"
+igor@ubuntu-server:~$ kubectl get pv
+No resources found
+igor@ubuntu-server:~$ kubectl describe pv2
+error: the server doesn't have a resource type "pv2"
+igor@ubuntu-server:~$ kubectl describe pv pv2
+Error from server (NotFound): persistentvolumes "pv2" not found
+igor@ubuntu-server:~$ vi pod_pv_deployment.yaml
+igor@ubuntu-server:~$ vi conf_map_pv.yaml
+igor@ubuntu-server:~$ vi conf_map_pv.yaml
+igor@ubuntu-server:~$ vi conf_map_pv.yaml
+igor@ubuntu-server:~$ vi pvc_2.yaml
+igor@ubuntu-server:~$ vi pvc_2.yaml
+igor@ubuntu-server:~$ kubectl create -f conf_map_pv.yaml
+configmap/web created
+igor@ubuntu-server:~$ kubectl create -f pvc_2.yaml
+persistentvolumeclaim/webclaim created
+igor@ubuntu-server:~$ kubectl get pvc
+NAME                STATUS    VOLUME   CAPACITY   ACCESS MODES   STORAGECLASS       AGE
+data-database-0     Pending                                      csi-ceph-hdd-dp1   129d
+data-prometheus-0   Pending                                      csi-ceph-hdd-dp1   134d
+webclaim            Pending                                      local              62s
+igor@ubuntu-server:~$ kubectl get pv
+No resources found
+igor@ubuntu-server:~$ kubectl get pods
+NAME                             READY   STATUS    RESTARTS          AGE
+database-0                       0/1     Pending   0                 129d
+geekbrains-55df48c88d-klqx7      1/1     Running   9 (23h ago)       129d
+geekbrains-55df48c88d-rz2qz      1/1     Running   9 (23h ago)       129d
+gitlab-runner-7467648488-jmlsl   0/1     Running   130 (7m48s ago)   130d
+my-deployment-76499ffb7-5cj6v    1/1     Running   1 (23h ago)       24h
+my-deployment-76499ffb7-5jcmc    1/1     Running   1 (23h ago)       24h
+my-replicaset-47chw              1/1     Running   1 (23h ago)       24h
+my-replicaset-rcb4c              1/1     Running   1 (23h ago)       24h
+my-replicaset-xqjt7              1/1     Running   1 (23h ago)       24h
+node-exporter-n5xqk              1/1     Running   12 (23h ago)      134d
+prometheus-0                     0/1     Pending   0                 134d
+igor@ubuntu-server:~$ kubectl apply -f pod_pv_deployment.yaml
+error: error parsing pod_pv_deployment.yaml: error converting YAML to JSON: yaml: line 9: did not find expected key
+igor@ubuntu-server:~$ vi pod_pv_deployment.yaml
+igor@ubuntu-server:~$ vi pod_pv_deployment.yaml
+igor@ubuntu-server:~$ kubectl apply -f pod_pv_deployment.yaml
+error: error parsing pod_pv_deployment.yaml: error converting YAML to JSON: yaml: line 9: did not find expected key
+igor@ubuntu-server:~$ vi pod_pv_deployment.yaml
+igor@ubuntu-server:~$ kubectl apply -f pod_pv_deployment.yaml
+deployment.apps/web created
+igor@ubuntu-server:~$ kubectl get pods
+NAME                             READY   STATUS             RESTARTS          AGE
+database-0                       0/1     Pending            0                 129d
+geekbrains-55df48c88d-klqx7      1/1     Running            9 (24h ago)       129d
+geekbrains-55df48c88d-rz2qz      1/1     Running            9 (24h ago)       129d
+gitlab-runner-7467648488-jmlsl   0/1     CrashLoopBackOff   131 (2m25s ago)   130d
+my-deployment-76499ffb7-5cj6v    1/1     Running            1 (24h ago)       24h
+my-deployment-76499ffb7-5jcmc    1/1     Running            1 (24h ago)       24h
+my-replicaset-47chw              1/1     Running            1 (24h ago)       24h
+my-replicaset-rcb4c              1/1     Running            1 (24h ago)       24h
+my-replicaset-xqjt7              1/1     Running            1 (24h ago)       24h
+node-exporter-n5xqk              1/1     Running            12 (24h ago)      134d
+prometheus-0                     0/1     Pending            0                 134d
+web-7695dfdcbd-ftsdg             0/1     Pending            0                 86s
+web-7695dfdcbd-mlnfd             0/1     Pending            0                 86s
+igor@ubuntu-server:~$ kubectl describe pod web-7695dfdcbd-ftsdg
+Name:           web-7695dfdcbd-ftsdg
+Namespace:      default
+Priority:       0
+Node:           <none>
+Labels:         app=web
+                pod-template-hash=7695dfdcbd
+Annotations:    <none>
+Status:         Pending
+IP:             
+IPs:            <none>
+Controlled By:  ReplicaSet/web-7695dfdcbd
+Init Containers:
+  mount-permissions-fix:
+    Image:      busybox
+    Port:       <none>
+    Host Port:  <none>
+    Command:
+      sh
+      -c
+      chmod 777 /data
+    Environment:  <none>
+    Mounts:
+      /data from data (rw)
+      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-jbfd2 (ro)
+Containers:
+  nginx:
+    Image:      nginx:1.14
+    Port:       80/TCP
+    Host Port:  0/TCP
+    Limits:
+      cpu:     100Mi
+      memory:  100Mi
+    Requests:
+      cpu:        100m
+      memory:     100Mi
+    Environment:  <none>
+    Mounts:
+      /data from data (rw)
+      /etc/nginx/conf.d from config (rw)
+      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-jbfd2 (ro)
+Conditions:
+  Type           Status
+  PodScheduled   False 
+Volumes:
+  config:
+    Type:      ConfigMap (a volume populated by a ConfigMap)
+    Name:      web
+    Optional:  false
+  data:
+    Type:       PersistentVolumeClaim (a reference to a PersistentVolumeClaim in the same namespace)
+    ClaimName:  webclaim
+    ReadOnly:   false
+  kube-api-access-jbfd2:
+    Type:                    Projected (a volume that contains injected data from multiple sources)
+    TokenExpirationSeconds:  3607
+    ConfigMapName:           kube-root-ca.crt
+    ConfigMapOptional:       <nil>
+    DownwardAPI:             true
+QoS Class:                   Burstable
+Node-Selectors:              <none>
+Tolerations:                 node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
+                             node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
+Events:
+  Type     Reason            Age                   From               Message
+  ----     ------            ----                  ----               -------
+  Warning  FailedScheduling  3m44s                 default-scheduler  0/1 nodes are available: 1 pod has unbound immediate PersistentVolumeClaims.
+  Warning  FailedScheduling  101s (x1 over 2m41s)  default-scheduler  0/1 nodes are available: 1 pod has unbound immediate PersistentVolumeClaims.
+igor@ubuntu-server:~$ kubectl get pv
+No resources found
+igor@ubuntu-server:~$ kubectl get pvc
+NAME                STATUS    VOLUME   CAPACITY   ACCESS MODES   STORAGECLASS       AGE
+data-database-0     Pending                                      csi-ceph-hdd-dp1   129d
+data-prometheus-0   Pending                                      csi-ceph-hdd-dp1   134d
+webclaim            Pending                                      local              25m
+igor@ubuntu-server:~$ 
+
