@@ -1,0 +1,1795 @@
+igor@igor-MS-7808:~$ ssh igor@192.168.1.70
+igor@192.168.1.70's password: 
+Welcome to Ubuntu 20.04.4 LTS (GNU/Linux 5.4.0-105-generic x86_64)
+
+ * Documentation:  https://help.ubuntu.com
+ * Management:     https://landscape.canonical.com
+ * Support:        https://ubuntu.com/advantage
+
+  System information as of Вс 27 мар 2022 16:00:49 UTC
+
+  System load:                      0.64
+  Usage of /:                       72.4% of 23.99GB
+  Memory usage:                     18%
+  Swap usage:                       0%
+  Processes:                        157
+  Users logged in:                  0
+  IPv4 address for br-11f4f1756b47: 192.168.49.1
+  IPv4 address for docker0:         172.17.0.1
+  IPv4 address for enp0s3:          192.168.1.70
+  IPv6 address for enp0s3:          2a00:1370:81a8:4ef5:efbe:375f:2dc4:f0a8
+  IPv6 address for enp0s3:          2a00:1370:81a8:4ef5:a00:27ff:feed:d11a
+  IPv6 address for enp0s3:          fd81:2f4:e5b0:1:a00:27ff:feed:d11a
+
+ * Super-optimized for small spaces - read how we shrank the memory
+   footprint of MicroK8s to make it the smallest full K8s around.
+
+   https://ubuntu.com/blog/microk8s-memory-optimisation
+
+5 updates can be applied immediately.
+To see these additional updates run: apt list --upgradable
+
+
+Last login: Sat Mar 26 20:58:11 2022 from 192.168.1.68
+igor@ubuntu-server:~$ minikube start
+😄  minikube v1.23.2 on Ubuntu 20.04 (vbox/amd64)
+✨  Using the docker driver based on existing profile
+👍  Starting control plane node minikube in cluster minikube
+🚜  Pulling base image ...
+🔄  Restarting existing docker container for "minikube" ...
+🐳  Preparing Kubernetes v1.22.2 on Docker 20.10.8 ...
+🔎  Verifying Kubernetes components...
+    ▪ Using image gcr.io/k8s-minikube/storage-provisioner:v5
+    ▪ Using image k8s.gcr.io/ingress-nginx/controller:v1.0.0-beta.3
+    ▪ Using image k8s.gcr.io/ingress-nginx/kube-webhook-certgen:v1.0
+    ▪ Using image k8s.gcr.io/ingress-nginx/kube-webhook-certgen:v1.0
+🔎  Verifying ingress addon...
+🌟  Enabled addons: storage-provisioner, default-storageclass, ingress
+🏄  Done! kubectl is now configured to use "minikube" cluster and "default" namespace by default
+igor@ubuntu-server:~$ minikube status
+minikube
+type: Control Plane
+host: Running
+kubelet: Running
+apiserver: Running
+kubeconfig: Configured
+
+igor@ubuntu-server:~$ vi daemonset1.yaml
+igor@ubuntu-server:~$ kubectl create -f daemonset1.yaml
+Warning: spec.template.spec.nodeSelector[beta.kubernetes.io/os]: deprecated since v1.14; use "kubernetes.io/os" instead
+Error from server (AlreadyExists): error when creating "daemonset1.yaml": daemonsets.apps "node-exporter" already exists
+igor@ubuntu-server:~$ kubectl get daemonset
+NAME            DESIRED   CURRENT   READY   UP-TO-DATE   AVAILABLE   NODE SELECTOR                 AGE
+node-exporter   1         1         1       1            1           beta.kubernetes.io/os=linux   134d
+igor@ubuntu-server:~$ kubectl describe daemonset node-exporter
+Name:           node-exporter
+Selector:       app=node-exporter
+Node-Selector:  beta.kubernetes.io/os=linux
+Labels:         app=node-exporter
+Annotations:    deprecated.daemonset.template.generation: 1
+Desired Number of Nodes Scheduled: 1
+Current Number of Nodes Scheduled: 1
+Number of Nodes Scheduled with Up-to-date Pods: 1
+Number of Nodes Scheduled with Available Pods: 1
+Number of Nodes Misscheduled: 0
+Pods Status:  1 Running / 0 Waiting / 0 Succeeded / 0 Failed
+Pod Template:
+  Labels:  app=node-exporter
+  Containers:
+   node-exporter:
+    Image:      quay.io/prometheus/node-exporter:v0.16.0
+    Port:       <none>
+    Host Port:  <none>
+    Args:
+      --web.listen-address=0.0.0.0:9101
+      --path.procfs=/host/proc
+      --path.sysfs=/host/sys
+      --collector.filesystem.ignored-mount-points=^/(dev|proc|sys|var/lib/docker/.+)($|/)
+      --collector.filesystem.ignored-fs-types=^(autofs|binfmt_misc|cgroup|configfs|debugfs|devpts|devtmpfs|fusectl|hugetlbfs|mqueue|overlay|proc|procfs|pstore|rpc_pipefs|securityfs|sysfs|tracefs)$
+    Environment:  <none>
+    Mounts:
+      /host/proc from proc (rw)
+      /host/root from root (ro)
+      /host/sys from sys (rw)
+  Volumes:
+   proc:
+    Type:          HostPath (bare host directory volume)
+    Path:          /proc
+    HostPathType:  
+   sys:
+    Type:          HostPath (bare host directory volume)
+    Path:          /sys
+    HostPathType:  
+   root:
+    Type:          HostPath (bare host directory volume)
+    Path:          /
+    HostPathType:  
+Events:            <none>
+igor@ubuntu-server:~$ vi statefulset.yaml
+igor@ubuntu-server:~$ vi statefulset.yaml
+igor@ubuntu-server:~$ kubectl apply -f statefulset.yaml
+statefulset.apps/rabbitmq created
+igor@ubuntu-server:~$ kubectl get pods
+NAME                             READY   STATUS    RESTARTS          AGE
+app-probe-f775c7b8f-866hw        1/1     Running   1 (46m ago)       19h
+database-0                       0/1     Pending   0                 130d
+geekbrains-55df48c88d-klqx7      1/1     Running   10 (46m ago)      130d
+geekbrains-55df48c88d-rz2qz      1/1     Running   10 (46m ago)      130d
+gitlab-runner-7467648488-jmlsl   0/1     Running   160 (5m22s ago)   131d
+my-deployment-76499ffb7-5cj6v    1/1     Running   2 (46m ago)       45h
+my-deployment-76499ffb7-5jcmc    1/1     Running   2 (46m ago)       45h
+my-replicaset-47chw              1/1     Running   2 (46m ago)       45h
+my-replicaset-rcb4c              1/1     Running   2 (46m ago)       45h
+my-replicaset-xqjt7              1/1     Running   2 (46m ago)       45h
+node-exporter-n5xqk              1/1     Running   13 (46m ago)      134d
+prometheus-0                     0/1     Pending   0                 134d
+web-7695dfdcbd-ftsdg             0/1     Pending   0                 20h
+web-7695dfdcbd-mlnfd             0/1     Pending   0                 20h
+web2-5b669f8984-86wvp            1/1     Running   1 (46m ago)       19h
+igor@ubuntu-server:~$ kubectl get pods
+NAME                             READY   STATUS    RESTARTS          AGE
+app-probe-f775c7b8f-866hw        1/1     Running   1 (47m ago)       19h
+database-0                       0/1     Pending   0                 130d
+geekbrains-55df48c88d-klqx7      1/1     Running   10 (47m ago)      130d
+geekbrains-55df48c88d-rz2qz      1/1     Running   10 (47m ago)      130d
+gitlab-runner-7467648488-jmlsl   0/1     Running   160 (6m13s ago)   131d
+my-deployment-76499ffb7-5cj6v    1/1     Running   2 (47m ago)       45h
+my-deployment-76499ffb7-5jcmc    1/1     Running   2 (47m ago)       45h
+my-replicaset-47chw              1/1     Running   2 (47m ago)       45h
+my-replicaset-rcb4c              1/1     Running   2 (47m ago)       45h
+my-replicaset-xqjt7              1/1     Running   2 (47m ago)       45h
+node-exporter-n5xqk              1/1     Running   13 (47m ago)      134d
+prometheus-0                     0/1     Pending   0                 134d
+web-7695dfdcbd-ftsdg             0/1     Pending   0                 20h
+web-7695dfdcbd-mlnfd             0/1     Pending   0                 20h
+web2-5b669f8984-86wvp            1/1     Running   1 (47m ago)       19h
+igor@ubuntu-server:~$ kubectl get statefulset
+NAME         READY   AGE
+database     0/1     130d
+prometheus   0/1     134d
+rabbitmq     0/3     2m12s
+igor@ubuntu-server:~$ kubectl describe rabbitmq
+error: the server doesn't have a resource type "rabbitmq"
+igor@ubuntu-server:~$ kubectl describe statefulset rabbitmq
+Name:               rabbitmq
+Namespace:          default
+CreationTimestamp:  Sun, 27 Mar 2022 16:47:19 +0000
+Selector:           app=rabbitmq
+Labels:             <none>
+Annotations:        <none>
+Replicas:           3 desired | 0 total
+Update Strategy:    RollingUpdate
+  Partition:        0
+Pods Status:        0 Running / 0 Waiting / 0 Succeeded / 0 Failed
+Pod Template:
+  Labels:           app=rabbitmq
+  Service Account:  rabbitmq
+  Containers:
+   rabbitmq-k8s:
+    Image:       rabbitmq:3.7-management
+    Ports:       5672/TCP, 15672/TCP
+    Host Ports:  0/TCP, 0/TCP
+    Liveness:    exec [rabbitmqctl status] delay=60s timeout=15s period=60s #success=1 #failure=3
+    Readiness:   exec [rabbitmqctl status] delay=20s timeout=10s period=60s #success=1 #failure=3
+    Environment:
+      MY_POD_IP:                (v1:status.podIP)
+      RABBITMQ_USE_LONGNAME:   true
+      RABBITMQ_NODENAME:       rabbit@$(MY_POD_IP)
+      K8S_SERVICE_NAME:        rabbitmq
+      RABBITMQ_ERLANG_COOKIE:  mycookie
+    Mounts:
+      /etc/rabbitmq from config-volume (rw)
+      /var/lib/rabbitmq from data (rw)
+  Volumes:
+   config-volume:
+    Type:      ConfigMap (a volume populated by a ConfigMap)
+    Name:      rabbitmq-config
+    Optional:  false
+Volume Claims:
+  Name:          data
+  StorageClass:  csi-ceph-hdd-dp1
+  Labels:        <none>
+  Annotations:   <none>
+  Capacity:      1Gi
+  Access Modes:  [ReadWriteOnce]
+Events:
+  Type     Reason            Age                    From                    Message
+  ----     ------            ----                   ----                    -------
+  Normal   SuccessfulCreate  4m27s                  statefulset-controller  create Claim data-rabbitmq-0 Pod rabbitmq-0 in StatefulSet rabbitmq success
+  Warning  FailedCreate      103s (x16 over 4m27s)  statefulset-controller  create Pod rabbitmq-0 in StatefulSet rabbitmq failed error: pods "rabbitmq-0" is forbidden: error looking up service account default/rabbitmq: serviceaccount "rabbitmq" not found
+igor@ubuntu-server:~$ vi job2.yaml
+igor@ubuntu-server:~$ vi job2.yaml
+igor@ubuntu-server:~$ kubectl apply -f job2.yaml
+job.batch/hello-job created
+igor@ubuntu-server:~$ kubectl get pods
+NAME                             READY   STATUS             RESTARTS        AGE
+app-probe-f775c7b8f-866hw        1/1     Running            1 (116m ago)    20h
+database-0                       0/1     Pending            0               130d
+geekbrains-55df48c88d-klqx7      1/1     Running            10 (116m ago)   130d
+geekbrains-55df48c88d-rz2qz      1/1     Running            10 (116m ago)   130d
+gitlab-runner-7467648488-jmlsl   0/1     CrashLoopBackOff   168 (52s ago)   131d
+hello-job--1-2nj6m               1/1     Running            0               34s
+my-deployment-76499ffb7-5cj6v    1/1     Running            2 (116m ago)    46h
+my-deployment-76499ffb7-5jcmc    1/1     Running            2 (116m ago)    46h
+my-replicaset-47chw              1/1     Running            2 (116m ago)    46h
+my-replicaset-rcb4c              1/1     Running            2 (116m ago)    46h
+my-replicaset-xqjt7              1/1     Running            2 (116m ago)    46h
+node-exporter-n5xqk              1/1     Running            13 (116m ago)   134d
+prometheus-0                     0/1     Pending            0               135d
+web-7695dfdcbd-ftsdg             0/1     Pending            0               21h
+web-7695dfdcbd-mlnfd             0/1     Pending            0               21h
+web2-5b669f8984-86wvp            1/1     Running            1 (116m ago)    20h
+igor@ubuntu-server:~$ kubectl get jobs
+NAME        COMPLETIONS   DURATION   AGE
+hello-job   0/1           109s       109s
+igor@ubuntu-server:~$ kubectl describe job hello-job
+Name:                     hello-job
+Namespace:                default
+Selector:                 controller-uid=7d8ac3c8-80b2-4534-83f5-bcc468d9e67f
+Labels:                   controller-uid=7d8ac3c8-80b2-4534-83f5-bcc468d9e67f
+                          job-name=hello-job
+Annotations:              <none>
+Parallelism:              1
+Completions:              1
+Completion Mode:          NonIndexed
+Start Time:               Sun, 27 Mar 2022 17:57:03 +0000
+Active Deadline Seconds:  60s
+Pods Statuses:            0 Active / 0 Succeeded / 1 Failed
+Pod Template:
+  Labels:  controller-uid=7d8ac3c8-80b2-4534-83f5-bcc468d9e67f
+           job-name=hello-job
+  Containers:
+   hello-job:
+    Image:      busybox
+    Port:       <none>
+    Host Port:  <none>
+    Args:
+      /bin/sh
+      -c
+      while true; do slip 1; date; echo Hello from the Kubernetes cluster; done
+    Environment:  <none>
+    Mounts:       <none>
+  Volumes:        <none>
+Events:
+  Type     Reason            Age   From            Message
+  ----     ------            ----  ----            -------
+  Normal   SuccessfulCreate  118s  job-controller  Created pod: hello-job--1-2nj6m
+  Normal   SuccessfulDelete  58s   job-controller  Deleted pod: hello-job--1-2nj6m
+  Warning  DeadlineExceeded  58s   job-controller  Job was active longer than specified deadline
+igor@ubuntu-server:~$ kubectl get pods
+NAME                             READY   STATUS             RESTARTS          AGE
+app-probe-f775c7b8f-866hw        1/1     Running            1 (119m ago)      20h
+database-0                       0/1     Pending            0                 130d
+geekbrains-55df48c88d-klqx7      1/1     Running            10 (119m ago)     130d
+geekbrains-55df48c88d-rz2qz      1/1     Running            10 (119m ago)     130d
+gitlab-runner-7467648488-jmlsl   0/1     CrashLoopBackOff   168 (4m15s ago)   131d
+my-deployment-76499ffb7-5cj6v    1/1     Running            2 (119m ago)      46h
+my-deployment-76499ffb7-5jcmc    1/1     Running            2 (119m ago)      46h
+my-replicaset-47chw              1/1     Running            2 (119m ago)      46h
+my-replicaset-rcb4c              1/1     Running            2 (119m ago)      46h
+my-replicaset-xqjt7              1/1     Running            2 (119m ago)      46h
+node-exporter-n5xqk              1/1     Running            13 (119m ago)     134d
+prometheus-0                     0/1     Pending            0                 135d
+web-7695dfdcbd-ftsdg             0/1     Pending            0                 21h
+web-7695dfdcbd-mlnfd             0/1     Pending            0                 21h
+web2-5b669f8984-86wvp            1/1     Running            1 (119m ago)      20h
+igor@ubuntu-server:~$ kubectl get pods -all
+error: unknown shorthand flag: 'a' in -all
+See 'kubectl get --help' for usage.
+igor@ubuntu-server:~$ kubectl get pods --all-namespaces
+NAMESPACE       NAME                                        READY   STATUS      RESTARTS          AGE
+default         app-probe-f775c7b8f-866hw                   1/1     Running     1 (121m ago)      21h
+default         database-0                                  0/1     Pending     0                 130d
+default         geekbrains-55df48c88d-klqx7                 1/1     Running     10 (121m ago)     130d
+default         geekbrains-55df48c88d-rz2qz                 1/1     Running     10 (121m ago)     130d
+default         gitlab-runner-7467648488-jmlsl              1/1     Running     169 (5m42s ago)   131d
+default         my-deployment-76499ffb7-5cj6v               1/1     Running     2 (121m ago)      46h
+default         my-deployment-76499ffb7-5jcmc               1/1     Running     2 (121m ago)      46h
+default         my-replicaset-47chw                         1/1     Running     2 (121m ago)      46h
+default         my-replicaset-rcb4c                         1/1     Running     2 (121m ago)      46h
+default         my-replicaset-xqjt7                         1/1     Running     2 (121m ago)      46h
+default         node-exporter-n5xqk                         1/1     Running     13 (121m ago)     134d
+default         prometheus-0                                0/1     Pending     0                 135d
+default         web-7695dfdcbd-ftsdg                        0/1     Pending     0                 22h
+default         web-7695dfdcbd-mlnfd                        0/1     Pending     0                 22h
+default         web2-5b669f8984-86wvp                       1/1     Running     1 (121m ago)      20h
+gitlab          gitlab-runner-7467648488-2mdf6              1/1     Running     89 (5m54s ago)    127d
+ingress-nginx   ingress-nginx-admission-create--1-5z22r     0/1     Completed   0                 138d
+ingress-nginx   ingress-nginx-admission-patch--1-sgdmc      0/1     Completed   1                 138d
+ingress-nginx   ingress-nginx-controller-69bdbc4d57-z67vb   1/1     Running     14 (121m ago)     138d
+kube-system     coredns-78fcd69978-7c8pw                    1/1     Running     17 (121m ago)     146d
+kube-system     etcd-minikube                               1/1     Running     17 (121m ago)     146d
+kube-system     kube-apiserver-minikube                     1/1     Running     17 (121m ago)     146d
+kube-system     kube-controller-manager-minikube            1/1     Running     17 (121m ago)     146d
+kube-system     kube-proxy-4zwp6                            1/1     Running     17 (121m ago)     146d
+kube-system     kube-scheduler-minikube                     1/1     Running     17 (121m ago)     146d
+kube-system     storage-provisioner                         1/1     Running     30 (120m ago)     146d
+prod            database-0                                  0/1     Pending     0                 127d
+prod            geekbrains-55df48c88d-htjs5                 1/1     Running     8 (121m ago)      127d
+prod            geekbrains-55df48c88d-mv8wk                 1/1     Running     8 (121m ago)      127d
+redmine         pg-db-757b89cf9-p8dtq                       0/1     Pending     0                 138d
+redmine         redmine-app-58fc94cf66-kl4nw                0/1     Error       451 (5m19s ago)   138d
+stage           database-0                                  0/1     Pending     0                 127d
+stage           geekbrains-55df48c88d-7qgzb                 1/1     Running     8 (121m ago)      127d
+stage           geekbrains-55df48c88d-gf5tm                 1/1     Running     8 (121m ago)      127d
+igor@ubuntu-server:~$ kubectl describe job hello-job
+Name:                     hello-job
+Namespace:                default
+Selector:                 controller-uid=7d8ac3c8-80b2-4534-83f5-bcc468d9e67f
+Labels:                   controller-uid=7d8ac3c8-80b2-4534-83f5-bcc468d9e67f
+                          job-name=hello-job
+Annotations:              <none>
+Parallelism:              1
+Completions:              1
+Completion Mode:          NonIndexed
+Start Time:               Sun, 27 Mar 2022 17:57:03 +0000
+Active Deadline Seconds:  60s
+Pods Statuses:            0 Active / 0 Succeeded / 1 Failed
+Pod Template:
+  Labels:  controller-uid=7d8ac3c8-80b2-4534-83f5-bcc468d9e67f
+           job-name=hello-job
+  Containers:
+   hello-job:
+    Image:      busybox
+    Port:       <none>
+    Host Port:  <none>
+    Args:
+      /bin/sh
+      -c
+      while true; do slip 1; date; echo Hello from the Kubernetes cluster; done
+    Environment:  <none>
+    Mounts:       <none>
+  Volumes:        <none>
+Events:
+  Type     Reason            Age    From            Message
+  ----     ------            ----   ----            -------
+  Normal   SuccessfulCreate  6m26s  job-controller  Created pod: hello-job--1-2nj6m
+  Normal   SuccessfulDelete  5m26s  job-controller  Deleted pod: hello-job--1-2nj6m
+  Warning  DeadlineExceeded  5m26s  job-controller  Job was active longer than specified deadline
+igor@ubuntu-server:~$ vi cronjob.yaml
+igor@ubuntu-server:~$ kubectl apply -f cronjob.yaml
+Warning: batch/v1beta1 CronJob is deprecated in v1.21+, unavailable in v1.25+; use batch/v1 CronJob
+cronjob.batch/hello-cron-job created
+igor@ubuntu-server:~$ kubectl get pods
+NAME                               READY   STATUS             RESTARTS          AGE
+app-probe-f775c7b8f-866hw          1/1     Running            1 (126m ago)      21h
+database-0                         0/1     Pending            0                 130d
+geekbrains-55df48c88d-klqx7        1/1     Running            10 (126m ago)     130d
+geekbrains-55df48c88d-rz2qz        1/1     Running            10 (126m ago)     130d
+gitlab-runner-7467648488-jmlsl     0/1     CrashLoopBackOff   169 (3m27s ago)   131d
+hello-cron-job-27473408--1-cdpjn   0/1     Completed          0                 14s
+my-deployment-76499ffb7-5cj6v      1/1     Running            2 (126m ago)      46h
+my-deployment-76499ffb7-5jcmc      1/1     Running            2 (126m ago)      46h
+my-replicaset-47chw                1/1     Running            2 (126m ago)      46h
+my-replicaset-rcb4c                1/1     Running            2 (126m ago)      46h
+my-replicaset-xqjt7                1/1     Running            2 (126m ago)      46h
+node-exporter-n5xqk                1/1     Running            13 (126m ago)     134d
+prometheus-0                       0/1     Pending            0                 135d
+web-7695dfdcbd-ftsdg               0/1     Pending            0                 22h
+web-7695dfdcbd-mlnfd               0/1     Pending            0                 22h
+web2-5b669f8984-86wvp              1/1     Running            1 (126m ago)      20h
+igor@ubuntu-server:~$ kubectl get cronjobs
+NAME             SCHEDULE      SUSPEND   ACTIVE   LAST SCHEDULE   AGE
+hello-cron-job   */1 * * * *   False     0        47s             76s
+igor@ubuntu-server:~$ kubectl describe job hello-cron-job
+Name:                     hello-cron-job-27473408
+Namespace:                default
+Selector:                 controller-uid=3a4066a0-e1e1-4e5c-9aaf-a21543f22dba
+Labels:                   controller-uid=3a4066a0-e1e1-4e5c-9aaf-a21543f22dba
+                          job-name=hello-cron-job-27473408
+Annotations:              <none>
+Controlled By:            CronJob/hello-cron-job
+Parallelism:              1
+Completions:              1
+Completion Mode:          NonIndexed
+Start Time:               Sun, 27 Mar 2022 18:08:00 +0000
+Completed At:             Sun, 27 Mar 2022 18:08:03 +0000
+Duration:                 3s
+Active Deadline Seconds:  100s
+Pods Statuses:            0 Active / 1 Succeeded / 0 Failed
+Pod Template:
+  Labels:  controller-uid=3a4066a0-e1e1-4e5c-9aaf-a21543f22dba
+           job-name=hello-cron-job-27473408
+  Containers:
+   hello-cron-job:
+    Image:      busybox
+    Port:       <none>
+    Host Port:  <none>
+    Args:
+      /bin/sh
+      -c
+      date; echo Hello from the Kubernetes cluster
+    Environment:  <none>
+    Mounts:       <none>
+  Volumes:        <none>
+Events:
+  Type    Reason            Age   From            Message
+  ----    ------            ----  ----            -------
+  Normal  SuccessfulCreate  69s   job-controller  Created pod: hello-cron-job-27473408--1-cdpjn
+  Normal  Completed         66s   job-controller  Job completed
+
+Name:                     hello-cron-job-27473409
+Namespace:                default
+Selector:                 controller-uid=f5d098a0-93bc-4f65-ae00-d4f2807f5bd6
+Labels:                   controller-uid=f5d098a0-93bc-4f65-ae00-d4f2807f5bd6
+                          job-name=hello-cron-job-27473409
+Annotations:              <none>
+Controlled By:            CronJob/hello-cron-job
+Parallelism:              1
+Completions:              1
+Completion Mode:          NonIndexed
+Start Time:               Sun, 27 Mar 2022 18:09:00 +0000
+Completed At:             Sun, 27 Mar 2022 18:09:03 +0000
+Duration:                 3s
+Active Deadline Seconds:  100s
+Pods Statuses:            0 Active / 1 Succeeded / 0 Failed
+Pod Template:
+  Labels:  controller-uid=f5d098a0-93bc-4f65-ae00-d4f2807f5bd6
+           job-name=hello-cron-job-27473409
+  Containers:
+   hello-cron-job:
+    Image:      busybox
+    Port:       <none>
+    Host Port:  <none>
+    Args:
+      /bin/sh
+      -c
+      date; echo Hello from the Kubernetes cluster
+    Environment:  <none>
+    Mounts:       <none>
+  Volumes:        <none>
+Events:
+  Type    Reason            Age   From            Message
+  ----    ------            ----  ----            -------
+  Normal  SuccessfulCreate  9s    job-controller  Created pod: hello-cron-job-27473409--1-nz54t
+  Normal  Completed         6s    job-controller  Job completed
+
+igor@ubuntu-server:~$ kubectl get pods
+NAME                               READY   STATUS      RESTARTS          AGE
+app-probe-f775c7b8f-866hw          1/1     Running     1 (129m ago)      21h
+database-0                         0/1     Pending     0                 130d
+geekbrains-55df48c88d-klqx7        1/1     Running     10 (129m ago)     130d
+geekbrains-55df48c88d-rz2qz        1/1     Running     10 (129m ago)     130d
+gitlab-runner-7467648488-jmlsl     1/1     Running     170 (6m33s ago)   131d
+hello-cron-job-27473409--1-nz54t   0/1     Completed   0                 2m20s
+hello-cron-job-27473410--1-pm2nw   0/1     Completed   0                 80s
+hello-cron-job-27473411--1-hmz8q   0/1     Completed   0                 20s
+my-deployment-76499ffb7-5cj6v      1/1     Running     2 (129m ago)      46h
+my-deployment-76499ffb7-5jcmc      1/1     Running     2 (129m ago)      46h
+my-replicaset-47chw                1/1     Running     2 (129m ago)      46h
+my-replicaset-rcb4c                1/1     Running     2 (129m ago)      46h
+my-replicaset-xqjt7                1/1     Running     2 (129m ago)      46h
+node-exporter-n5xqk                1/1     Running     13 (129m ago)     134d
+prometheus-0                       0/1     Pending     0                 135d
+web-7695dfdcbd-ftsdg               0/1     Pending     0                 22h
+web-7695dfdcbd-mlnfd               0/1     Pending     0                 22h
+web2-5b669f8984-86wvp              1/1     Running     1 (129m ago)      20h
+igor@ubuntu-server:~$ kubectl get jobs
+NAME                      COMPLETIONS   DURATION   AGE
+hello-cron-job-27473410   1/1           3s         2m11s
+hello-cron-job-27473411   1/1           3s         71s
+hello-cron-job-27473412   1/1           4s         11s
+hello-job                 0/1           15m        15m
+igor@ubuntu-server:~$ kubectl get cronjobs
+NAME             SCHEDULE      SUSPEND   ACTIVE   LAST SCHEDULE   AGE
+hello-cron-job   */1 * * * *   False     1        3s              5m32s
+igor@ubuntu-server:~$ kubectl delete cronjob hello-cron-job
+cronjob.batch "hello-cron-job" deleted
+igor@ubuntu-server:~$ vi php-apache.yaml
+igor@ubuntu-server:~$ kubectl apply -f php-apache.yaml
+deployment.apps/php-apache-hps created
+service/php-apache-hps created
+igor@ubuntu-server:~$ kubectl get pods
+NAME                             READY   STATUS              RESTARTS         AGE
+app-probe-f775c7b8f-866hw        1/1     Running             1 (136m ago)     21h
+database-0                       0/1     Pending             0                130d
+geekbrains-55df48c88d-klqx7      1/1     Running             10 (136m ago)    130d
+geekbrains-55df48c88d-rz2qz      1/1     Running             10 (136m ago)    130d
+gitlab-runner-7467648488-jmlsl   0/1     CrashLoopBackOff    170 (5m6s ago)   131d
+my-deployment-76499ffb7-5cj6v    1/1     Running             2 (136m ago)     46h
+my-deployment-76499ffb7-5jcmc    1/1     Running             2 (136m ago)     46h
+my-replicaset-47chw              1/1     Running             2 (136m ago)     47h
+my-replicaset-rcb4c              1/1     Running             2 (136m ago)     46h
+my-replicaset-xqjt7              1/1     Running             2 (136m ago)     47h
+node-exporter-n5xqk              1/1     Running             13 (136m ago)    134d
+php-apache-hps-f7855487b-7225c   0/1     ContainerCreating   0                16s
+prometheus-0                     0/1     Pending             0                135d
+web-7695dfdcbd-ftsdg             0/1     Pending             0                22h
+web-7695dfdcbd-mlnfd             0/1     Pending             0                22h
+web2-5b669f8984-86wvp            1/1     Running             1 (136m ago)     20h
+igor@ubuntu-server:~$ kubectl describe pod
+Name:         app-probe-f775c7b8f-866hw
+Namespace:    default
+Priority:     0
+Node:         minikube/192.168.49.2
+Start Time:   Sat, 26 Mar 2022 21:02:19 +0000
+Labels:       app=app-probe
+              pod-template-hash=f775c7b8f
+Annotations:  <none>
+Status:       Running
+IP:           172.17.0.16
+IPs:
+  IP:           172.17.0.16
+Controlled By:  ReplicaSet/app-probe-f775c7b8f
+Containers:
+  nginx:
+    Container ID:   docker://1028d8e3bf90d7cfc4438a3773d6953fbb595ed02f368c851a7207ec176022f9
+    Image:          nginx:1.20
+    Image ID:       docker-pullable://nginx@sha256:70ffa5088f7a3be061ae2b0816abc36f52db185c023c4bc039d7fb8fe490fcf8
+    Port:           80/TCP
+    Host Port:      0/TCP
+    State:          Running
+      Started:      Sun, 27 Mar 2022 16:01:57 +0000
+    Last State:     Terminated
+      Reason:       Error
+      Exit Code:    255
+      Started:      Sat, 26 Mar 2022 21:02:31 +0000
+      Finished:     Sun, 27 Mar 2022 16:01:23 +0000
+    Ready:          True
+    Restart Count:  1
+    Liveness:       http-get http://:80/ delay=10s timeout=60s period=10s #success=1 #failure=3
+    Readiness:      http-get http://:80/ delay=0s timeout=60s period=10s #success=1 #failure=3
+    Environment:    <none>
+    Mounts:
+      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-mr7hb (ro)
+Conditions:
+  Type              Status
+  Initialized       True 
+  Ready             True 
+  ContainersReady   True 
+  PodScheduled      True 
+Volumes:
+  kube-api-access-mr7hb:
+    Type:                    Projected (a volume that contains injected data from multiple sources)
+    TokenExpirationSeconds:  3607
+    ConfigMapName:           kube-root-ca.crt
+    ConfigMapOptional:       <nil>
+    DownwardAPI:             true
+QoS Class:                   BestEffort
+Node-Selectors:              <none>
+Tolerations:                 node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
+                             node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
+Events:                      <none>
+
+
+Name:           database-0
+Namespace:      default
+Priority:       0
+Node:           <none>
+Labels:         app=database
+                controller-revision-hash=database-7b99cdfbd5
+                statefulset.kubernetes.io/pod-name=database-0
+Annotations:    <none>
+Status:         Pending
+IP:             
+IPs:            <none>
+Controlled By:  StatefulSet/database
+Containers:
+  postgres:
+    Image:      postgres:10.13
+    Port:       5432/TCP
+    Host Port:  0/TCP
+    Environment:
+      POSTGRES_USER:      app
+      POSTGRES_DB:        users
+      PGDATA:             /var/lib/postgresql/data/pgdata
+      POSTGRES_PASSWORD:  <set to the key 'db-password' in secret 'app'>  Optional: false
+    Mounts:
+      /var/lib/postgresql/data from data (rw)
+      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-mxqzt (ro)
+Conditions:
+  Type           Status
+  PodScheduled   False 
+Volumes:
+  data:
+    Type:       PersistentVolumeClaim (a reference to a PersistentVolumeClaim in the same namespace)
+    ClaimName:  data-database-0
+    ReadOnly:   false
+  kube-api-access-mxqzt:
+    Type:                    Projected (a volume that contains injected data from multiple sources)
+    TokenExpirationSeconds:  3607
+    ConfigMapName:           kube-root-ca.crt
+    ConfigMapOptional:       <nil>
+    DownwardAPI:             true
+QoS Class:                   BestEffort
+Node-Selectors:              <none>
+Tolerations:                 node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
+                             node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
+Events:
+  Type     Reason            Age                     From               Message
+  ----     ------            ----                    ----               -------
+  Warning  FailedScheduling  2m19s (x133 over 137m)  default-scheduler  0/1 nodes are available: 1 pod has unbound immediate PersistentVolumeClaims.
+
+
+Name:         geekbrains-55df48c88d-klqx7
+Namespace:    default
+Priority:     0
+Node:         minikube/192.168.49.2
+Start Time:   Tue, 16 Nov 2021 20:37:45 +0000
+Labels:       app=app
+              pod-template-hash=55df48c88d
+Annotations:  <none>
+Status:       Running
+IP:           172.17.0.5
+IPs:
+  IP:           172.17.0.5
+Controlled By:  ReplicaSet/geekbrains-55df48c88d
+Containers:
+  app:
+    Container ID:   docker://d6810f9a785783a64d26a88620c1092e3b1d27fb6d0c7aeef096eead1854a6f1
+    Image:          nginx:1.12
+    Image ID:       docker-pullable://nginx@sha256:72daaf46f11cc753c4eab981cbf869919bd1fee3d2170a2adeac12400f494728
+    Port:           8000/TCP
+    Host Port:      0/TCP
+    State:          Running
+      Started:      Sun, 27 Mar 2022 16:01:53 +0000
+    Last State:     Terminated
+      Reason:       Error
+      Exit Code:    255
+      Started:      Sat, 26 Mar 2022 17:43:39 +0000
+      Finished:     Sun, 27 Mar 2022 16:01:23 +0000
+    Ready:          True
+    Restart Count:  10
+    Limits:
+      cpu:     100m
+      memory:  128Mi
+    Requests:
+      cpu:     100m
+      memory:  128Mi
+    Environment:
+      DB_HOST:      database
+      DB_PORT:      5432
+      DB_USER:      app
+      DB_PASSWORD:  <set to the key 'db-password' in secret 'app'>  Optional: false
+      DB_NAME:      users
+    Mounts:
+      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-j7j7j (ro)
+Conditions:
+  Type              Status
+  Initialized       True 
+  Ready             True 
+  ContainersReady   True 
+  PodScheduled      True 
+Volumes:
+  kube-api-access-j7j7j:
+    Type:                    Projected (a volume that contains injected data from multiple sources)
+    TokenExpirationSeconds:  3607
+    ConfigMapName:           kube-root-ca.crt
+    ConfigMapOptional:       <nil>
+    DownwardAPI:             true
+QoS Class:                   Guaranteed
+Node-Selectors:              <none>
+Tolerations:                 node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
+                             node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
+Events:                      <none>
+
+
+Name:         geekbrains-55df48c88d-rz2qz
+Namespace:    default
+Priority:     0
+Node:         minikube/192.168.49.2
+Start Time:   Tue, 16 Nov 2021 20:37:45 +0000
+Labels:       app=app
+              pod-template-hash=55df48c88d
+Annotations:  <none>
+Status:       Running
+IP:           172.17.0.6
+IPs:
+  IP:           172.17.0.6
+Controlled By:  ReplicaSet/geekbrains-55df48c88d
+Containers:
+  app:
+    Container ID:   docker://99b2429801518595f2cebf3208e7379f240e8e4fbd4b0ce8d29cffcc057fc771
+    Image:          nginx:1.12
+    Image ID:       docker-pullable://nginx@sha256:72daaf46f11cc753c4eab981cbf869919bd1fee3d2170a2adeac12400f494728
+    Port:           8000/TCP
+    Host Port:      0/TCP
+    State:          Running
+      Started:      Sun, 27 Mar 2022 16:01:53 +0000
+    Last State:     Terminated
+      Reason:       Error
+      Exit Code:    255
+      Started:      Sat, 26 Mar 2022 17:43:40 +0000
+      Finished:     Sun, 27 Mar 2022 16:01:23 +0000
+    Ready:          True
+    Restart Count:  10
+    Limits:
+      cpu:     100m
+      memory:  128Mi
+    Requests:
+      cpu:     100m
+      memory:  128Mi
+    Environment:
+      DB_HOST:      database
+      DB_PORT:      5432
+      DB_USER:      app
+      DB_PASSWORD:  <set to the key 'db-password' in secret 'app'>  Optional: false
+      DB_NAME:      users
+    Mounts:
+      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-mtsqq (ro)
+Conditions:
+  Type              Status
+  Initialized       True 
+  Ready             True 
+  ContainersReady   True 
+  PodScheduled      True 
+Volumes:
+  kube-api-access-mtsqq:
+    Type:                    Projected (a volume that contains injected data from multiple sources)
+    TokenExpirationSeconds:  3607
+    ConfigMapName:           kube-root-ca.crt
+    ConfigMapOptional:       <nil>
+    DownwardAPI:             true
+QoS Class:                   Guaranteed
+Node-Selectors:              <none>
+Tolerations:                 node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
+                             node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
+Events:                      <none>
+
+
+Name:         gitlab-runner-7467648488-jmlsl
+Namespace:    default
+Priority:     0
+Node:         minikube/192.168.49.2
+Start Time:   Mon, 15 Nov 2021 22:22:08 +0000
+Labels:       app=gitlab-runner
+              pod-template-hash=7467648488
+Annotations:  <none>
+Status:       Running
+IP:           172.17.0.10
+IPs:
+  IP:           172.17.0.10
+Controlled By:  ReplicaSet/gitlab-runner-7467648488
+Init Containers:
+  configure:
+    Container ID:  docker://ae331ff431f61245715d743b925027c15b9fdcbb2b70c30efcab063302df53cd
+    Image:         gitlab/gitlab-runner:alpine-v13.2.0
+    Image ID:      docker-pullable://gitlab/gitlab-runner@sha256:06e2b46ada1b70f6e625bad58651138210a3d93dd877088b977567871379b8a8
+    Port:          <none>
+    Host Port:     <none>
+    Command:
+      sh
+      /config/configure
+    State:          Terminated
+      Reason:       Completed
+      Exit Code:    0
+      Started:      Sun, 27 Mar 2022 16:01:56 +0000
+      Finished:     Sun, 27 Mar 2022 16:01:56 +0000
+    Ready:          True
+    Restart Count:  3
+    Environment:
+      CI_SERVER_URL:                                    https://gitlab.com/
+      CLONE_URL:                                        
+      RUNNER_REQUEST_CONCURRENCY:                       1
+      RUNNER_EXECUTOR:                                  kubernetes
+      REGISTER_LOCKED:                                  true
+      RUNNER_TAG_LIST:                                  
+      RUNNER_OUTPUT_LIMIT:                              4096
+      KUBERNETES_IMAGE:                                 ubuntu:16.04
+      KUBERNETES_PRIVILEGED:                            true
+      KUBERNETES_NAMESPACE:                             gitlab
+      KUBERNETES_POLL_TIMEOUT:                          180
+      KUBERNETES_CPU_LIMIT:                             
+      KUBERNETES_CPU_LIMIT_OVERWRITE_MAX_ALLOWED:       
+      KUBERNETES_MEMORY_LIMIT:                          
+      KUBERNETES_MEMORY_LIMIT_OVERWRITE_MAX_ALLOWED:    
+      KUBERNETES_CPU_REQUEST:                           
+      KUBERNETES_CPU_REQUEST_OVERWRITE_MAX_ALLOWED:     
+      KUBERNETES_MEMORY_REQUEST:                        
+      KUBERNETES_MEMORY_REQUEST_OVERWRITE_MAX_ALLOWED:  
+      KUBERNETES_SERVICE_ACCOUNT:                       
+      KUBERNETES_SERVICE_CPU_LIMIT:                     
+      KUBERNETES_SERVICE_MEMORY_LIMIT:                  
+      KUBERNETES_SERVICE_CPU_REQUEST:                   
+      KUBERNETES_SERVICE_MEMORY_REQUEST:                
+      KUBERNETES_HELPER_CPU_LIMIT:                      
+      KUBERNETES_HELPER_MEMORY_LIMIT:                   
+      KUBERNETES_HELPER_CPU_REQUEST:                    
+      KUBERNETES_HELPER_MEMORY_REQUEST:                 
+      KUBERNETES_HELPER_IMAGE:                          
+      KUBERNETES_PULL_POLICY:                           
+    Mounts:
+      /config from scripts (ro)
+      /init-secrets from init-runner-secrets (ro)
+      /secrets from runner-secrets (rw)
+      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-m4zx6 (ro)
+Containers:
+  gitlab-runner:
+    Container ID:  docker://ebbea69e3474036e133d70a4c508505cd2b2ed7b324ab9945dc500be79f4d7c1
+    Image:         gitlab/gitlab-runner:alpine-v13.2.0
+    Image ID:      docker-pullable://gitlab/gitlab-runner@sha256:06e2b46ada1b70f6e625bad58651138210a3d93dd877088b977567871379b8a8
+    Port:          9252/TCP
+    Host Port:     0/TCP
+    Command:
+      /bin/bash
+      /scripts/entrypoint
+    State:          Running
+      Started:      Sun, 27 Mar 2022 18:18:18 +0000
+    Last State:     Terminated
+      Reason:       Error
+      Exit Code:    1
+      Started:      Sun, 27 Mar 2022 18:10:02 +0000
+      Finished:     Sun, 27 Mar 2022 18:13:03 +0000
+    Ready:          True
+    Restart Count:  171
+    Liveness:       exec [/bin/bash /scripts/check-live] delay=60s timeout=1s period=10s #success=1 #failure=3
+    Readiness:      exec [/usr/bin/pgrep gitlab.*runner] delay=10s timeout=1s period=10s #success=1 #failure=3
+    Environment:
+      CI_SERVER_URL:                                    https://gitlab.com/
+      CLONE_URL:                                        
+      RUNNER_REQUEST_CONCURRENCY:                       1
+      RUNNER_EXECUTOR:                                  kubernetes
+      REGISTER_LOCKED:                                  true
+      RUNNER_TAG_LIST:                                  
+      RUNNER_OUTPUT_LIMIT:                              4096
+      KUBERNETES_IMAGE:                                 ubuntu:16.04
+      KUBERNETES_PRIVILEGED:                            true
+      KUBERNETES_NAMESPACE:                             gitlab
+      KUBERNETES_POLL_TIMEOUT:                          180
+      KUBERNETES_CPU_LIMIT:                             
+      KUBERNETES_CPU_LIMIT_OVERWRITE_MAX_ALLOWED:       
+      KUBERNETES_MEMORY_LIMIT:                          
+      KUBERNETES_MEMORY_LIMIT_OVERWRITE_MAX_ALLOWED:    
+      KUBERNETES_CPU_REQUEST:                           
+      KUBERNETES_CPU_REQUEST_OVERWRITE_MAX_ALLOWED:     
+      KUBERNETES_MEMORY_REQUEST:                        
+      KUBERNETES_MEMORY_REQUEST_OVERWRITE_MAX_ALLOWED:  
+      KUBERNETES_SERVICE_ACCOUNT:                       
+      KUBERNETES_SERVICE_CPU_LIMIT:                     
+      KUBERNETES_SERVICE_MEMORY_LIMIT:                  
+      KUBERNETES_SERVICE_CPU_REQUEST:                   
+      KUBERNETES_SERVICE_MEMORY_REQUEST:                
+      KUBERNETES_HELPER_CPU_LIMIT:                      
+      KUBERNETES_HELPER_MEMORY_LIMIT:                   
+      KUBERNETES_HELPER_CPU_REQUEST:                    
+      KUBERNETES_HELPER_MEMORY_REQUEST:                 
+      KUBERNETES_HELPER_IMAGE:                          
+      KUBERNETES_PULL_POLICY:                           
+    Mounts:
+      /home/gitlab-runner/.gitlab-runner from etc-gitlab-runner (rw)
+      /scripts from scripts (rw)
+      /secrets from runner-secrets (rw)
+      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-m4zx6 (ro)
+Conditions:
+  Type              Status
+  Initialized       True 
+  Ready             True 
+  ContainersReady   True 
+  PodScheduled      True 
+Volumes:
+  runner-secrets:
+    Type:       EmptyDir (a temporary directory that shares a pod's lifetime)
+    Medium:     Memory
+    SizeLimit:  <unset>
+  etc-gitlab-runner:
+    Type:       EmptyDir (a temporary directory that shares a pod's lifetime)
+    Medium:     Memory
+    SizeLimit:  <unset>
+  init-runner-secrets:
+    Type:                Projected (a volume that contains injected data from multiple sources)
+    SecretName:          gitlab-runner
+    SecretOptionalName:  <nil>
+  scripts:
+    Type:      ConfigMap (a volume populated by a ConfigMap)
+    Name:      gitlab-runner
+    Optional:  false
+  kube-api-access-m4zx6:
+    Type:                    Projected (a volume that contains injected data from multiple sources)
+    TokenExpirationSeconds:  3607
+    ConfigMapName:           kube-root-ca.crt
+    ConfigMapOptional:       <nil>
+    DownwardAPI:             true
+QoS Class:                   BestEffort
+Node-Selectors:              <none>
+Tolerations:                 node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
+                             node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
+Events:
+  Type     Reason     Age                     From     Message
+  ----     ------     ----                    ----     -------
+  Warning  Unhealthy  6m59s (x287 over 136m)  kubelet  Readiness probe failed:
+  Warning  BackOff    109s (x379 over 134m)   kubelet  Back-off restarting failed container
+
+
+Name:         my-deployment-76499ffb7-5cj6v
+Namespace:    default
+Priority:     0
+Node:         minikube/192.168.49.2
+Start Time:   Fri, 25 Mar 2022 19:32:18 +0000
+Labels:       app=my-app
+              pod-template-hash=76499ffb7
+Annotations:  <none>
+Status:       Running
+IP:           172.17.0.17
+IPs:
+  IP:           172.17.0.17
+Controlled By:  ReplicaSet/my-deployment-76499ffb7
+Containers:
+  nginx:
+    Container ID:   docker://ab82ce4117b0798eb7a1e25e9af847ab3281258d3e590316233f0c3830ce9831
+    Image:          nginx:1.12
+    Image ID:       docker-pullable://nginx@sha256:72daaf46f11cc753c4eab981cbf869919bd1fee3d2170a2adeac12400f494728
+    Port:           80/TCP
+    Host Port:      0/TCP
+    State:          Running
+      Started:      Sun, 27 Mar 2022 16:01:57 +0000
+    Last State:     Terminated
+      Reason:       Error
+      Exit Code:    255
+      Started:      Sat, 26 Mar 2022 17:43:42 +0000
+      Finished:     Sun, 27 Mar 2022 16:01:23 +0000
+    Ready:          True
+    Restart Count:  2
+    Environment:    <none>
+    Mounts:
+      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-7cwxn (ro)
+Conditions:
+  Type              Status
+  Initialized       True 
+  Ready             True 
+  ContainersReady   True 
+  PodScheduled      True 
+Volumes:
+  kube-api-access-7cwxn:
+    Type:                    Projected (a volume that contains injected data from multiple sources)
+    TokenExpirationSeconds:  3607
+    ConfigMapName:           kube-root-ca.crt
+    ConfigMapOptional:       <nil>
+    DownwardAPI:             true
+QoS Class:                   BestEffort
+Node-Selectors:              <none>
+Tolerations:                 node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
+                             node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
+Events:                      <none>
+
+
+Name:         my-deployment-76499ffb7-5jcmc
+Namespace:    default
+Priority:     0
+Node:         minikube/192.168.49.2
+Start Time:   Fri, 25 Mar 2022 19:32:18 +0000
+Labels:       app=my-app
+              pod-template-hash=76499ffb7
+Annotations:  <none>
+Status:       Running
+IP:           172.17.0.14
+IPs:
+  IP:           172.17.0.14
+Controlled By:  ReplicaSet/my-deployment-76499ffb7
+Containers:
+  nginx:
+    Container ID:   docker://1287148b9be51518727624bf115c19489f4f3a33148961e95d8f221a10163206
+    Image:          nginx:1.12
+    Image ID:       docker-pullable://nginx@sha256:72daaf46f11cc753c4eab981cbf869919bd1fee3d2170a2adeac12400f494728
+    Port:           80/TCP
+    Host Port:      0/TCP
+    State:          Running
+      Started:      Sun, 27 Mar 2022 16:01:57 +0000
+    Last State:     Terminated
+      Reason:       Error
+      Exit Code:    255
+      Started:      Sat, 26 Mar 2022 17:43:43 +0000
+      Finished:     Sun, 27 Mar 2022 16:01:23 +0000
+    Ready:          True
+    Restart Count:  2
+    Environment:    <none>
+    Mounts:
+      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-zc56c (ro)
+Conditions:
+  Type              Status
+  Initialized       True 
+  Ready             True 
+  ContainersReady   True 
+  PodScheduled      True 
+Volumes:
+  kube-api-access-zc56c:
+    Type:                    Projected (a volume that contains injected data from multiple sources)
+    TokenExpirationSeconds:  3607
+    ConfigMapName:           kube-root-ca.crt
+    ConfigMapOptional:       <nil>
+    DownwardAPI:             true
+QoS Class:                   BestEffort
+Node-Selectors:              <none>
+Tolerations:                 node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
+                             node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
+Events:                      <none>
+
+
+Name:         my-replicaset-47chw
+Namespace:    default
+Priority:     0
+Node:         minikube/192.168.49.2
+Start Time:   Fri, 25 Mar 2022 19:13:39 +0000
+Labels:       app=my-app
+Annotations:  <none>
+Status:       Running
+IP:           172.17.0.13
+IPs:
+  IP:           172.17.0.13
+Controlled By:  ReplicaSet/my-replicaset
+Containers:
+  nginx:
+    Container ID:   docker://66f085256ed2036b5849cee748636956d3720f6b20540dda4d9929dea3cc7a50
+    Image:          nginx:1.12
+    Image ID:       docker-pullable://nginx@sha256:72daaf46f11cc753c4eab981cbf869919bd1fee3d2170a2adeac12400f494728
+    Port:           80/TCP
+    Host Port:      0/TCP
+    State:          Running
+      Started:      Sun, 27 Mar 2022 16:01:56 +0000
+    Last State:     Terminated
+      Reason:       Error
+      Exit Code:    255
+      Started:      Sat, 26 Mar 2022 17:43:43 +0000
+      Finished:     Sun, 27 Mar 2022 16:01:23 +0000
+    Ready:          True
+    Restart Count:  2
+    Environment:    <none>
+    Mounts:
+      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-bbf4s (ro)
+Conditions:
+  Type              Status
+  Initialized       True 
+  Ready             True 
+  ContainersReady   True 
+  PodScheduled      True 
+Volumes:
+  kube-api-access-bbf4s:
+    Type:                    Projected (a volume that contains injected data from multiple sources)
+    TokenExpirationSeconds:  3607
+    ConfigMapName:           kube-root-ca.crt
+    ConfigMapOptional:       <nil>
+    DownwardAPI:             true
+QoS Class:                   BestEffort
+Node-Selectors:              <none>
+Tolerations:                 node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
+                             node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
+Events:                      <none>
+
+
+Name:         my-replicaset-rcb4c
+Namespace:    default
+Priority:     0
+Node:         minikube/192.168.49.2
+Start Time:   Fri, 25 Mar 2022 19:20:41 +0000
+Labels:       app=my-app
+Annotations:  <none>
+Status:       Running
+IP:           172.17.0.15
+IPs:
+  IP:           172.17.0.15
+Controlled By:  ReplicaSet/my-replicaset
+Containers:
+  nginx:
+    Container ID:   docker://210c009908e3574c50bcf364315552feadf0fc8b365dcdba209216420be0e20d
+    Image:          nginx:1.12
+    Image ID:       docker-pullable://nginx@sha256:72daaf46f11cc753c4eab981cbf869919bd1fee3d2170a2adeac12400f494728
+    Port:           80/TCP
+    Host Port:      0/TCP
+    State:          Running
+      Started:      Sun, 27 Mar 2022 16:01:56 +0000
+    Last State:     Terminated
+      Reason:       Error
+      Exit Code:    255
+      Started:      Sat, 26 Mar 2022 17:43:39 +0000
+      Finished:     Sun, 27 Mar 2022 16:01:23 +0000
+    Ready:          True
+    Restart Count:  2
+    Environment:    <none>
+    Mounts:
+      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-hqm6d (ro)
+Conditions:
+  Type              Status
+  Initialized       True 
+  Ready             True 
+  ContainersReady   True 
+  PodScheduled      True 
+Volumes:
+  kube-api-access-hqm6d:
+    Type:                    Projected (a volume that contains injected data from multiple sources)
+    TokenExpirationSeconds:  3607
+    ConfigMapName:           kube-root-ca.crt
+    ConfigMapOptional:       <nil>
+    DownwardAPI:             true
+QoS Class:                   BestEffort
+Node-Selectors:              <none>
+Tolerations:                 node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
+                             node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
+Events:                      <none>
+
+
+Name:         my-replicaset-xqjt7
+Namespace:    default
+Priority:     0
+Node:         minikube/192.168.49.2
+Start Time:   Fri, 25 Mar 2022 19:13:39 +0000
+Labels:       app=my-app
+Annotations:  <none>
+Status:       Running
+IP:           172.17.0.18
+IPs:
+  IP:           172.17.0.18
+Controlled By:  ReplicaSet/my-replicaset
+Containers:
+  nginx:
+    Container ID:   docker://07911482c78de2538c17282aeea5d66f2f956d5ea8c8d46d108e9b08e4075753
+    Image:          nginx:1.12
+    Image ID:       docker-pullable://nginx@sha256:72daaf46f11cc753c4eab981cbf869919bd1fee3d2170a2adeac12400f494728
+    Port:           80/TCP
+    Host Port:      0/TCP
+    State:          Running
+      Started:      Sun, 27 Mar 2022 16:01:57 +0000
+    Last State:     Terminated
+      Reason:       Error
+      Exit Code:    255
+      Started:      Sat, 26 Mar 2022 17:43:39 +0000
+      Finished:     Sun, 27 Mar 2022 16:01:23 +0000
+    Ready:          True
+    Restart Count:  2
+    Environment:    <none>
+    Mounts:
+      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-qcpcc (ro)
+Conditions:
+  Type              Status
+  Initialized       True 
+  Ready             True 
+  ContainersReady   True 
+  PodScheduled      True 
+Volumes:
+  kube-api-access-qcpcc:
+    Type:                    Projected (a volume that contains injected data from multiple sources)
+    TokenExpirationSeconds:  3607
+    ConfigMapName:           kube-root-ca.crt
+    ConfigMapOptional:       <nil>
+    DownwardAPI:             true
+QoS Class:                   BestEffort
+Node-Selectors:              <none>
+Tolerations:                 node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
+                             node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
+Events:                      <none>
+
+
+Name:         node-exporter-n5xqk
+Namespace:    default
+Priority:     0
+Node:         minikube/192.168.49.2
+Start Time:   Fri, 12 Nov 2021 19:12:58 +0000
+Labels:       app=node-exporter
+              controller-revision-hash=c6685fb69
+              pod-template-generation=1
+Annotations:  <none>
+Status:       Running
+IP:           192.168.49.2
+IPs:
+  IP:           192.168.49.2
+Controlled By:  DaemonSet/node-exporter
+Containers:
+  node-exporter:
+    Container ID:  docker://39d1ff279c1f754ea3ab70a90ce2012364dce3a44d9afa5db8754700cd9c90c6
+    Image:         quay.io/prometheus/node-exporter:v0.16.0
+    Image ID:      docker-pullable://quay.io/prometheus/node-exporter@sha256:efee114b233bc58f70ba039431f5f097f1c8f88bf5317200e7fb33377a2bc453
+    Port:          <none>
+    Host Port:     <none>
+    Args:
+      --web.listen-address=0.0.0.0:9101
+      --path.procfs=/host/proc
+      --path.sysfs=/host/sys
+      --collector.filesystem.ignored-mount-points=^/(dev|proc|sys|var/lib/docker/.+)($|/)
+      --collector.filesystem.ignored-fs-types=^(autofs|binfmt_misc|cgroup|configfs|debugfs|devpts|devtmpfs|fusectl|hugetlbfs|mqueue|overlay|proc|procfs|pstore|rpc_pipefs|securityfs|sysfs|tracefs)$
+    State:          Running
+      Started:      Sun, 27 Mar 2022 16:01:51 +0000
+    Last State:     Terminated
+      Reason:       Error
+      Exit Code:    255
+      Started:      Sat, 26 Mar 2022 17:43:38 +0000
+      Finished:     Sun, 27 Mar 2022 16:01:23 +0000
+    Ready:          True
+    Restart Count:  13
+    Environment:    <none>
+    Mounts:
+      /host/proc from proc (rw)
+      /host/root from root (ro)
+      /host/sys from sys (rw)
+      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-sff77 (ro)
+Conditions:
+  Type              Status
+  Initialized       True 
+  Ready             True 
+  ContainersReady   True 
+  PodScheduled      True 
+Volumes:
+  proc:
+    Type:          HostPath (bare host directory volume)
+    Path:          /proc
+    HostPathType:  
+  sys:
+    Type:          HostPath (bare host directory volume)
+    Path:          /sys
+    HostPathType:  
+  root:
+    Type:          HostPath (bare host directory volume)
+    Path:          /
+    HostPathType:  
+  kube-api-access-sff77:
+    Type:                    Projected (a volume that contains injected data from multiple sources)
+    TokenExpirationSeconds:  3607
+    ConfigMapName:           kube-root-ca.crt
+    ConfigMapOptional:       <nil>
+    DownwardAPI:             true
+QoS Class:                   BestEffort
+Node-Selectors:              beta.kubernetes.io/os=linux
+Tolerations:                 :NoSchedule op=Exists
+                             node.kubernetes.io/disk-pressure:NoSchedule op=Exists
+                             node.kubernetes.io/memory-pressure:NoSchedule op=Exists
+                             node.kubernetes.io/network-unavailable:NoSchedule op=Exists
+                             node.kubernetes.io/not-ready:NoExecute op=Exists
+                             node.kubernetes.io/pid-pressure:NoSchedule op=Exists
+                             node.kubernetes.io/unreachable:NoExecute op=Exists
+                             node.kubernetes.io/unschedulable:NoSchedule op=Exists
+Events:                      <none>
+
+
+Name:         php-apache-hps-f7855487b-7225c
+Namespace:    default
+Priority:     0
+Node:         minikube/192.168.49.2
+Start Time:   Sun, 27 Mar 2022 18:17:53 +0000
+Labels:       pod-template-hash=f7855487b
+              run=php-apache-hps
+Annotations:  <none>
+Status:       Running
+IP:           172.17.0.20
+IPs:
+  IP:           172.17.0.20
+Controlled By:  ReplicaSet/php-apache-hps-f7855487b
+Containers:
+  php-apache-hps:
+    Container ID:   docker://5284aa302220e9dff6226a14535862b14819c49dcb5f26f0d7a17e23c3e1ed59
+    Image:          k8s.gcr.io/hpa-example
+    Image ID:       docker-pullable://k8s.gcr.io/hpa-example@sha256:581697a37f0e136db86d6b30392f0db40ce99c8248a7044c770012f4e8491544
+    Port:           80/TCP
+    Host Port:      0/TCP
+    State:          Running
+      Started:      Sun, 27 Mar 2022 18:18:19 +0000
+    Ready:          True
+    Restart Count:  0
+    Limits:
+      cpu:  500m
+    Requests:
+      cpu:        200m
+    Environment:  <none>
+    Mounts:
+      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-zd88j (ro)
+Conditions:
+  Type              Status
+  Initialized       True 
+  Ready             True 
+  ContainersReady   True 
+  PodScheduled      True 
+Volumes:
+  kube-api-access-zd88j:
+    Type:                    Projected (a volume that contains injected data from multiple sources)
+    TokenExpirationSeconds:  3607
+    ConfigMapName:           kube-root-ca.crt
+    ConfigMapOptional:       <nil>
+    DownwardAPI:             true
+QoS Class:                   Burstable
+Node-Selectors:              <none>
+Tolerations:                 node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
+                             node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
+Events:
+  Type    Reason     Age   From               Message
+  ----    ------     ----  ----               -------
+  Normal  Scheduled  72s   default-scheduler  Successfully assigned default/php-apache-hps-f7855487b-7225c to minikube
+  Normal  Pulling    71s   kubelet            Pulling image "k8s.gcr.io/hpa-example"
+  Normal  Pulled     47s   kubelet            Successfully pulled image "k8s.gcr.io/hpa-example" in 24.765985451s
+  Normal  Created    46s   kubelet            Created container php-apache-hps
+  Normal  Started    46s   kubelet            Started container php-apache-hps
+
+
+Name:           prometheus-0
+Namespace:      default
+Priority:       0
+Node:           <none>
+Labels:         app=prometheus
+                controller-revision-hash=prometheus-77d44fd74b
+                statefulset.kubernetes.io/pod-name=prometheus-0
+Annotations:    <none>
+Status:         Pending
+IP:             
+IPs:            <none>
+Controlled By:  StatefulSet/prometheus
+Init Containers:
+  mount-permissions-fix:
+    Image:      busybox
+    Port:       <none>
+    Host Port:  <none>
+    Command:
+      sh
+      -c
+      chmod 777 /prometheus
+    Environment:  <none>
+    Mounts:
+      /prometheus from data (rw)
+      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-k97f8 (ro)
+Containers:
+  prometheus-k8s:
+    Image:        prom/prometheus:v2.19.2
+    Port:         9090/TCP
+    Host Port:    0/TCP
+    Environment:  <none>
+    Mounts:
+      /etc/prometheus from config (rw)
+      /prometheus from data (rw)
+      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-k97f8 (ro)
+Conditions:
+  Type           Status
+  PodScheduled   False 
+Volumes:
+  data:
+    Type:       PersistentVolumeClaim (a reference to a PersistentVolumeClaim in the same namespace)
+    ClaimName:  data-prometheus-0
+    ReadOnly:   false
+  config:
+    Type:      ConfigMap (a volume populated by a ConfigMap)
+    Name:      prometheus-config
+    Optional:  false
+  kube-api-access-k97f8:
+    Type:                    Projected (a volume that contains injected data from multiple sources)
+    TokenExpirationSeconds:  3607
+    ConfigMapName:           kube-root-ca.crt
+    ConfigMapOptional:       <nil>
+    DownwardAPI:             true
+QoS Class:                   BestEffort
+Node-Selectors:              <none>
+Tolerations:                 node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
+                             node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
+Events:
+  Type     Reason            Age                    From               Message
+  ----     ------            ----                   ----               -------
+  Warning  FailedScheduling  109s (x133 over 137m)  default-scheduler  0/1 nodes are available: 1 pod has unbound immediate PersistentVolumeClaims.
+
+
+Name:           web-7695dfdcbd-ftsdg
+Namespace:      default
+Priority:       0
+Node:           <none>
+Labels:         app=web
+                pod-template-hash=7695dfdcbd
+Annotations:    <none>
+Status:         Pending
+IP:             
+IPs:            <none>
+Controlled By:  ReplicaSet/web-7695dfdcbd
+Init Containers:
+  mount-permissions-fix:
+    Image:      busybox
+    Port:       <none>
+    Host Port:  <none>
+    Command:
+      sh
+      -c
+      chmod 777 /data
+    Environment:  <none>
+    Mounts:
+      /data from data (rw)
+      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-jbfd2 (ro)
+Containers:
+  nginx:
+    Image:      nginx:1.14
+    Port:       80/TCP
+    Host Port:  0/TCP
+    Limits:
+      cpu:     100Mi
+      memory:  100Mi
+    Requests:
+      cpu:        100m
+      memory:     100Mi
+    Environment:  <none>
+    Mounts:
+      /data from data (rw)
+      /etc/nginx/conf.d from config (rw)
+      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-jbfd2 (ro)
+Conditions:
+  Type           Status
+  PodScheduled   False 
+Volumes:
+  config:
+    Type:      ConfigMap (a volume populated by a ConfigMap)
+    Name:      web
+    Optional:  false
+  data:
+    Type:       PersistentVolumeClaim (a reference to a PersistentVolumeClaim in the same namespace)
+    ClaimName:  webclaim
+    ReadOnly:   false
+  kube-api-access-jbfd2:
+    Type:                    Projected (a volume that contains injected data from multiple sources)
+    TokenExpirationSeconds:  3607
+    ConfigMapName:           kube-root-ca.crt
+    ConfigMapOptional:       <nil>
+    DownwardAPI:             true
+QoS Class:                   Burstable
+Node-Selectors:              <none>
+Tolerations:                 node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
+                             node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
+Events:
+  Type     Reason            Age                    From               Message
+  ----     ------            ----                   ----               -------
+  Warning  FailedScheduling  109s (x133 over 137m)  default-scheduler  0/1 nodes are available: 1 pod has unbound immediate PersistentVolumeClaims.
+
+
+Name:           web-7695dfdcbd-mlnfd
+Namespace:      default
+Priority:       0
+Node:           <none>
+Labels:         app=web
+                pod-template-hash=7695dfdcbd
+Annotations:    <none>
+Status:         Pending
+IP:             
+IPs:            <none>
+Controlled By:  ReplicaSet/web-7695dfdcbd
+Init Containers:
+  mount-permissions-fix:
+    Image:      busybox
+    Port:       <none>
+    Host Port:  <none>
+    Command:
+      sh
+      -c
+      chmod 777 /data
+    Environment:  <none>
+    Mounts:
+      /data from data (rw)
+      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-wl9c8 (ro)
+Containers:
+  nginx:
+    Image:      nginx:1.14
+    Port:       80/TCP
+    Host Port:  0/TCP
+    Limits:
+      cpu:     100Mi
+      memory:  100Mi
+    Requests:
+      cpu:        100m
+      memory:     100Mi
+    Environment:  <none>
+    Mounts:
+      /data from data (rw)
+      /etc/nginx/conf.d from config (rw)
+      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-wl9c8 (ro)
+Conditions:
+  Type           Status
+  PodScheduled   False 
+Volumes:
+  config:
+    Type:      ConfigMap (a volume populated by a ConfigMap)
+    Name:      web
+    Optional:  false
+  data:
+    Type:       PersistentVolumeClaim (a reference to a PersistentVolumeClaim in the same namespace)
+    ClaimName:  webclaim
+    ReadOnly:   false
+  kube-api-access-wl9c8:
+    Type:                    Projected (a volume that contains injected data from multiple sources)
+    TokenExpirationSeconds:  3607
+    ConfigMapName:           kube-root-ca.crt
+    ConfigMapOptional:       <nil>
+    DownwardAPI:             true
+QoS Class:                   Burstable
+Node-Selectors:              <none>
+Tolerations:                 node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
+                             node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
+Events:
+  Type     Reason            Age                     From               Message
+  ----     ------            ----                    ----               -------
+  Warning  FailedScheduling  2m19s (x132 over 137m)  default-scheduler  0/1 nodes are available: 1 pod has unbound immediate PersistentVolumeClaims.
+
+
+Name:         web2-5b669f8984-86wvp
+Namespace:    default
+Priority:     0
+Node:         minikube/192.168.49.2
+Start Time:   Sat, 26 Mar 2022 21:35:26 +0000
+Labels:       app=web2
+              pod-template-hash=5b669f8984
+Annotations:  <none>
+Status:       Running
+IP:           172.17.0.19
+IPs:
+  IP:           172.17.0.19
+Controlled By:  ReplicaSet/web2-5b669f8984
+Containers:
+  hello-app:
+    Container ID:   docker://c0f607d0cd538596aec6e71a2f2bca70afbaea85b792de4d0ef76692a69054b6
+    Image:          gcr.io/google-samples/hello-app:1.0
+    Image ID:       docker-pullable://gcr.io/google-samples/hello-app@sha256:88b205d7995332e10e836514fbfd59ecaf8976fc15060cd66e85cdcebe7fb356
+    Port:           <none>
+    Host Port:      <none>
+    State:          Running
+      Started:      Sun, 27 Mar 2022 16:01:57 +0000
+    Last State:     Terminated
+      Reason:       Error
+      Exit Code:    255
+      Started:      Sat, 26 Mar 2022 21:35:30 +0000
+      Finished:     Sun, 27 Mar 2022 16:01:23 +0000
+    Ready:          True
+    Restart Count:  1
+    Environment:    <none>
+    Mounts:
+      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-xbwh6 (ro)
+Conditions:
+  Type              Status
+  Initialized       True 
+  Ready             True 
+  ContainersReady   True 
+  PodScheduled      True 
+Volumes:
+  kube-api-access-xbwh6:
+    Type:                    Projected (a volume that contains injected data from multiple sources)
+    TokenExpirationSeconds:  3607
+    ConfigMapName:           kube-root-ca.crt
+    ConfigMapOptional:       <nil>
+    DownwardAPI:             true
+QoS Class:                   BestEffort
+Node-Selectors:              <none>
+Tolerations:                 node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
+                             node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
+Events:                      <none>
+igor@ubuntu-server:~$ kubectl describe pod php-apache-hps-f7855487b-7225c
+Name:         php-apache-hps-f7855487b-7225c
+Namespace:    default
+Priority:     0
+Node:         minikube/192.168.49.2
+Start Time:   Sun, 27 Mar 2022 18:17:53 +0000
+Labels:       pod-template-hash=f7855487b
+              run=php-apache-hps
+Annotations:  <none>
+Status:       Running
+IP:           172.17.0.20
+IPs:
+  IP:           172.17.0.20
+Controlled By:  ReplicaSet/php-apache-hps-f7855487b
+Containers:
+  php-apache-hps:
+    Container ID:   docker://5284aa302220e9dff6226a14535862b14819c49dcb5f26f0d7a17e23c3e1ed59
+    Image:          k8s.gcr.io/hpa-example
+    Image ID:       docker-pullable://k8s.gcr.io/hpa-example@sha256:581697a37f0e136db86d6b30392f0db40ce99c8248a7044c770012f4e8491544
+    Port:           80/TCP
+    Host Port:      0/TCP
+    State:          Running
+      Started:      Sun, 27 Mar 2022 18:18:19 +0000
+    Ready:          True
+    Restart Count:  0
+    Limits:
+      cpu:  500m
+    Requests:
+      cpu:        200m
+    Environment:  <none>
+    Mounts:
+      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-zd88j (ro)
+Conditions:
+  Type              Status
+  Initialized       True 
+  Ready             True 
+  ContainersReady   True 
+  PodScheduled      True 
+Volumes:
+  kube-api-access-zd88j:
+    Type:                    Projected (a volume that contains injected data from multiple sources)
+    TokenExpirationSeconds:  3607
+    ConfigMapName:           kube-root-ca.crt
+    ConfigMapOptional:       <nil>
+    DownwardAPI:             true
+QoS Class:                   Burstable
+Node-Selectors:              <none>
+Tolerations:                 node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
+                             node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
+Events:
+  Type    Reason     Age    From               Message
+  ----    ------     ----   ----               -------
+  Normal  Scheduled  3m49s  default-scheduler  Successfully assigned default/php-apache-hps-f7855487b-7225c to minikube
+  Normal  Pulling    3m48s  kubelet            Pulling image "k8s.gcr.io/hpa-example"
+  Normal  Pulled     3m24s  kubelet            Successfully pulled image "k8s.gcr.io/hpa-example" in 24.765985451s
+  Normal  Created    3m23s  kubelet            Created container php-apache-hps
+  Normal  Started    3m23s  kubelet            Started container php-apache-hps
+igor@ubuntu-server:~$ kubectl get pods
+NAME                             READY   STATUS             RESTARTS        AGE
+app-probe-f775c7b8f-866hw        1/1     Running            1 (141m ago)    21h
+database-0                       0/1     Pending            0               130d
+geekbrains-55df48c88d-klqx7      1/1     Running            10 (141m ago)   130d
+geekbrains-55df48c88d-rz2qz      1/1     Running            10 (141m ago)   130d
+gitlab-runner-7467648488-jmlsl   0/1     CrashLoopBackOff   171 (44s ago)   131d
+my-deployment-76499ffb7-5cj6v    1/1     Running            2 (141m ago)    46h
+my-deployment-76499ffb7-5jcmc    1/1     Running            2 (141m ago)    46h
+my-replicaset-47chw              1/1     Running            2 (141m ago)    47h
+my-replicaset-rcb4c              1/1     Running            2 (141m ago)    47h
+my-replicaset-xqjt7              1/1     Running            2 (141m ago)    47h
+node-exporter-n5xqk              1/1     Running            13 (141m ago)   134d
+php-apache-hps-f7855487b-7225c   1/1     Running            0               4m39s
+prometheus-0                     0/1     Pending            0               135d
+web-7695dfdcbd-ftsdg             0/1     Pending            0               22h
+web-7695dfdcbd-mlnfd             0/1     Pending            0               22h
+web2-5b669f8984-86wvp            1/1     Running            1 (141m ago)    20h
+igor@ubuntu-server:~$ kubbectl delete pod app-probe-f775c7b8f-866hw 
+
+Command 'kubbectl' not found, did you mean:
+
+  command 'kubectl' from snap kubectl (1.23.5)
+
+See 'snap info <snapname>' for additional versions.
+
+igor@ubuntu-server:~$ kubbectl delete pod app-probe-f775c7b8f-866hw
+
+Command 'kubbectl' not found, did you mean:
+
+  command 'kubectl' from snap kubectl (1.23.5)
+
+See 'snap info <snapname>' for additional versions.
+
+igor@ubuntu-server:~$ kubbectl delete pod node-exporter-n5xqk
+
+Command 'kubbectl' not found, did you mean:
+
+  command 'kubectl' from snap kubectl (1.23.5)
+
+See 'snap info <snapname>' for additional versions.
+
+igor@ubuntu-server:~$ kubectl delete pod app-probe-f775c7b8f-866hw
+pod "app-probe-f775c7b8f-866hw" deleted
+igor@ubuntu-server:~$ kubectl delete pod node-exporter-n5xqk
+pod "node-exporter-n5xqk" deleted
+igor@ubuntu-server:~$ kubectl delete pod geekbrains-55df48c88d-klqx7
+pod "geekbrains-55df48c88d-klqx7" deleted
+igor@ubuntu-server:~$ kubectl delete pod geekbrains-55df48c88d-rz2qz
+pod "geekbrains-55df48c88d-rz2qz" deleted
+igor@ubuntu-server:~$ kubectl delete pod gitlab-runner-7467648488-jmlsl
+pod "gitlab-runner-7467648488-jmlsl" deleted
+igor@ubuntu-server:~$ kubectl delete pod prometheus-0
+pod "prometheus-0" deleted
+igor@ubuntu-server:~$ kubectl get pods
+NAME                             READY   STATUS    RESTARTS       AGE
+app-probe-f775c7b8f-knb2m        1/1     Running   0              4m42s
+database-0                       0/1     Pending   0              130d
+geekbrains-55df48c88d-lfbpm      1/1     Running   0              3m13s
+geekbrains-55df48c88d-xsbr4      1/1     Running   0              3m36s
+gitlab-runner-7467648488-hhsw6   0/1     Running   0              2m51s
+my-deployment-76499ffb7-5cj6v    1/1     Running   2 (149m ago)   46h
+my-deployment-76499ffb7-5jcmc    1/1     Running   2 (149m ago)   46h
+my-replicaset-47chw              1/1     Running   2 (149m ago)   47h
+my-replicaset-rcb4c              1/1     Running   2 (149m ago)   47h
+my-replicaset-xqjt7              1/1     Running   2 (149m ago)   47h
+node-exporter-kpcch              1/1     Running   0              4m29s
+php-apache-hps-f7855487b-7225c   1/1     Running   0              13m
+prometheus-0                     0/1     Pending   0              15s
+web-7695dfdcbd-ftsdg             0/1     Pending   0              22h
+web-7695dfdcbd-mlnfd             0/1     Pending   0              22h
+web2-5b669f8984-86wvp            1/1     Running   1 (149m ago)   20h
+igor@ubuntu-server:~$ kubectl delete pod database-0
+pod "database-0" deleted
+igor@ubuntu-server:~$ kubectl delete pod my-deployment-76499ffb7-5cj6v
+pod "my-deployment-76499ffb7-5cj6v" deleted
+igor@ubuntu-server:~$ kubectl delete pod my-deployment-76499ffb7-5jcmc
+pod "my-deployment-76499ffb7-5jcmc" deleted
+igor@ubuntu-server:~$ kubectl delete pod my-replicaset-47chw
+pod "my-replicaset-47chw" deleted
+igor@ubuntu-server:~$ kubectl delete pod my-replicaset-rcb4c
+pod "my-replicaset-rcb4c" deleted
+igor@ubuntu-server:~$ kubectl delete pod my-replicaset-xqjt7
+pod "my-replicaset-xqjt7" deleted
+igor@ubuntu-server:~$ kubectl get pods
+NAME                             READY   STATUS             RESTARTS       AGE
+app-probe-f775c7b8f-knb2m        1/1     Running            0              8m3s
+database-0                       0/1     Pending            0              2m21s
+geekbrains-55df48c88d-lfbpm      1/1     Running            0              6m34s
+geekbrains-55df48c88d-xsbr4      1/1     Running            0              6m57s
+gitlab-runner-7467648488-hhsw6   0/1     CrashLoopBackOff   1 (13s ago)    6m12s
+my-deployment-76499ffb7-g2s2v    1/1     Running            0              82s
+my-deployment-76499ffb7-vfjt2    1/1     Running            0              65s
+my-replicaset-7wljl              1/1     Running            0              49s
+my-replicaset-qc62v              1/1     Running            0              15s
+my-replicaset-r8b67              1/1     Running            0              31s
+node-exporter-kpcch              1/1     Running            0              7m50s
+php-apache-hps-f7855487b-7225c   1/1     Running            0              16m
+prometheus-0                     0/1     Pending            0              3m36s
+web-7695dfdcbd-ftsdg             0/1     Pending            0              22h
+web-7695dfdcbd-mlnfd             0/1     Pending            0              22h
+web2-5b669f8984-86wvp            1/1     Running            1 (153m ago)   20h
+igor@ubuntu-server:~$ kubectl get replicaset
+NAME                       DESIRED   CURRENT   READY   AGE
+app-probe-f775c7b8f        1         1         1       21h
+geekbrains-55df48c88d      2         2         2       130d
+gitlab-runner-7467648488   1         1         0       131d
+my-deployment-76499ffb7    2         2         2       47h
+my-replicaset              3         3         3       47h
+php-apache-hps-f7855487b   1         1         1       19m
+web-7695dfdcbd             2         2         0       22h
+web2-5b669f8984            1         1         1       21h
+igor@ubuntu-server:~$ kubectl delete web-7695dfdcbd
+error: the server doesn't have a resource type "web-7695dfdcbd"
+igor@ubuntu-server:~$ kubectl delete replicaset web-7695dfdcbd
+replicaset.apps "web-7695dfdcbd" deleted
+igor@ubuntu-server:~$ kubectl delete replicaset web2-5b669f8984
+replicaset.apps "web2-5b669f8984" deleted
+igor@ubuntu-server:~$ kubectl delete replicaset geekbrains-55df48c88d
+replicaset.apps "geekbrains-55df48c88d" deleted
+igor@ubuntu-server:~$ kubectl delete replicaset gitlab-runner-7467648488
+replicaset.apps "gitlab-runner-7467648488" deleted
+igor@ubuntu-server:~$ kubectl delete replicaset my-deployment-76499ffb7
+replicaset.apps "my-deployment-76499ffb7" deleted
+igor@ubuntu-server:~$ kubectl delete replicaset my-replicaset
+replicaset.apps "my-replicaset" deleted
+igor@ubuntu-server:~$ kubectl delete replicaset php-apache-hps-f7855487b
+replicaset.apps "php-apache-hps-f7855487b" deleted
+igor@ubuntu-server:~$ php-apache-hps-f7855487b
+php-apache-hps-f7855487b: command not found
+igor@ubuntu-server:~$ kubectl get replicaset
+NAME                       DESIRED   CURRENT   READY   AGE
+app-probe-f775c7b8f        1         1         1       21h
+geekbrains-55df48c88d      2         2         2       105s
+gitlab-runner-7467648488   1         1         1       91s
+my-deployment-76499ffb7    2         2         2       59s
+php-apache-hps-f7855487b   1         1         1       26s
+web-7695dfdcbd             2         2         0       3m1s
+web2-5b669f8984            1         1         1       2m39s
+igor@ubuntu-server:~$ ^C
+igor@ubuntu-server:~$ kubectl get deployments
+NAME             READY   UP-TO-DATE   AVAILABLE   AGE
+app-probe        1/1     1            1           21h
+geekbrains       2/2     2            2           130d
+gitlab-runner    0/1     1            0           131d
+my-deployment    2/2     2            2           47h
+php-apache-hps   1/1     1            1           32m
+web              0/2     2            0           22h
+web2             1/1     1            1           21h
+igor@ubuntu-server:~$ kubectl delete deployment web2
+deployment.apps "web2" deleted
+igor@ubuntu-server:~$ kubectl delete deployment web
+deployment.apps "web" deleted
+igor@ubuntu-server:~$ kubectl delete deployment php-apache-hps
+deployment.apps "php-apache-hps" deleted
+igor@ubuntu-server:~$ kubectl delete deployment my-deployment
+deployment.apps "my-deployment" deleted
+igor@ubuntu-server:~$ kubectl delete deployment gitlab-runner
+deployment.apps "gitlab-runner" deleted
+igor@ubuntu-server:~$ kubectl delete deployment geekbrains
+deployment.apps "geekbrains" deleted
+igor@ubuntu-server:~$ kubectl delete deployment app-probe
+deployment.apps "app-probe" deleted
+igor@ubuntu-server:~$ kubectl get deployments
+No resources found in default namespace.
+igor@ubuntu-server:~$ kubectl get replicaset
+No resources found in default namespace.
+igor@ubuntu-server:~$ kubectl pods
+error: unknown command "pods" for "kubectl"
+
+Did you mean this?
+	logs
+igor@ubuntu-server:~$ kubectl get pods
+NAME                  READY   STATUS    RESTARTS   AGE
+database-0            0/1     Pending   0          25m
+node-exporter-kpcch   1/1     Running   0          31m
+prometheus-0          0/1     Pending   0          27m
+igor@ubuntu-server:~$ kubectl get daemonset
+NAME            DESIRED   CURRENT   READY   UP-TO-DATE   AVAILABLE   NODE SELECTOR                 AGE
+node-exporter   1         1         1       1            1           beta.kubernetes.io/os=linux   135d
+igor@ubuntu-server:~$ kubectl delete ^C
+igor@ubuntu-server:~$ kubectl delete daemonset node-exporter
+daemonset.apps "node-exporter" deleted
+igor@ubuntu-server:~$ kubectl get pods
+NAME           READY   STATUS    RESTARTS   AGE
+database-0     0/1     Pending   0          29m
+prometheus-0   0/1     Pending   0          30m
+igor@ubuntu-server:~$ kubectl top pod
+error: Metrics API not available
+igor@ubuntu-server:~$ kubectl autoscale deployment php-apache-hps --cpu-persent=50 --min=1 --max=5
+error: unknown flag: --cpu-persent
+See 'kubectl autoscale --help' for usage.
+igor@ubuntu-server:~$ kubectl autoscale deployment php-apache-hps --cpu-percent=50 --min=1 --max=5
+Error from server (NotFound): deployments.apps "php-apache-hps" not found
+igor@ubuntu-server:~$ kubectl get hpa
+No resources found in default namespace.
+igor@ubuntu-server:~$ kubectl get pods
+NAME           READY   STATUS    RESTARTS   AGE
+database-0     0/1     Pending   0          37m
+prometheus-0   0/1     Pending   0          38m
+igor@ubuntu-server:~$ 
+
