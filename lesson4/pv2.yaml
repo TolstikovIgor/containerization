@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: PersistenVolume
+metadata:
+        name: pv2
+spec:
+        capacity:
+                 storage: 5Gi
+        accessModes:
+         - ReadWriteOnce
+        hostPath:
+            path: /pv_1
+        storageClassName: local
