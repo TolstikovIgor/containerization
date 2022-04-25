@@ -1,6 +1,8 @@
 # Микросервисная архитектура и контейнеризация
 ![](logo.png)
 #### Факультет Data Engineering
+___
+[Курсовой проект](https://github.com/TolstikovIgor/containerization/tree/main/lesson8)
 ____
 #### Урок 1. Микросервисы и контейнеры
 * Монолиты
